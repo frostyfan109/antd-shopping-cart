@@ -1,0 +1,24 @@
+{
+  "include": "src",
+  "exclude": ["dist", "node_modules"],
+  "compilerOptions": {
+    "target": "esnext",
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "preserveConstEnums": true,
+    "sourceMap": true,
+    "lib": [ "es2017", "dom" ],
+    "outDir": "dist",
+    "rootDir": "src",
+    "declarationMap": true,
+    "declaration": true,
+    "emitDeclarationOnly": true
+  }
+}

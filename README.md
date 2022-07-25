@@ -13,16 +13,8 @@ npm install --save antd-shopping-cart
 ## Usage
 
 ```jsx
-import React, { Component } from 'react'
-
-import MyComponent from 'antd-shopping-cart'
 import 'antd-shopping-cart/dist/index.css'
 
-class Example extends Component {
-  render() {
-    return <MyComponent />
-  }
-}
 ```
 
 ## License
