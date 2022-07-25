@@ -5,8 +5,6 @@ import { CreateCartModal } from './modals/create-cart-modal'
 import { useLocalStorage } from './hooks/use-local-storage'
 import { CardTabListType } from 'antd/lib/card'
 
-const ShoppingCartContext = createContext({})
-
 type ID = number | string
 
 type Total = {
@@ -75,10 +73,37 @@ const createCartItem = (item: ItemBlueprint): Item => {
   }
 }
 
+
+interface IShoppingCartContext {
+  carts: Cart[],
+  addCart: (cart: CartBlueprint) => void,
+  removeCart: (name: string | Cart) => void,
+  updateCart: (
+    name: string | Cart,
+    props: Partial<Cart> | ((prevState: Cart) => Partial<Cart>)
+  ) => void,
+  emptyCart: (name: string | Cart) => void,
+  
+  addToCart: (cartName: string | Cart, item: ItemBlueprint, notify: boolean) => void,
+  removeFromCart: (cartName: string | Cart, itemId: ID | Item, bucketId: ID, notify: boolean) => void,
+
+  isItemInBucket: (cartName: string | Cart, itemId: ID | Item, bucketId: ID) => boolean,
+  isItemInCart: (cartName: string | Cart, itemId: ID | Item) => boolean,
+  
+  activeCart: Cart,
+  setActiveCart: (name: string | Cart) => void,
+  getBucketTotal: (cartName: string | Cart, bucketId: ID) => Total,
+  getCartTotal: (cartName: string | Cart) => Total,
+
+  buckets: Bucket[], getBucket: (id?: ID) => Bucket,
+
+  openCreateCartModal: () => void, closeCreateCartModal: () => void
+}
+
+export const ShoppingCartContext = createContext<IShoppingCartContext>({} as IShoppingCartContext)
 export const useShoppingCart = () => useContext(ShoppingCartContext)
 
-
-interface IShoppingCartProvider {
+interface ShoppingCartProviderProps {
   buckets: Bucket[],
   defaultCartName?: string,
   localStorageKey?: string,
@@ -90,7 +115,7 @@ export const ShoppingCartProvider = ({
   localStorageKey="shopping_carts",
 
   children
-}: IShoppingCartProvider) => {
+}: ShoppingCartProviderProps) => {
   const [carts, setCarts] = useLocalStorage<Cart[]>(localStorageKey, [ createCart({
     name: defaultCartName,
     canDelete: false
@@ -185,7 +210,7 @@ export const ShoppingCartProvider = ({
         null,
         "Added ",
         createElement("i", null, cartItem.name),
-        `to ${ cart.name }`,
+        ` to ${ cart.name }`,
       ),
       icon: createElement(PlusOutlined),
       key: `cart-alert-${ cartName }-${ cartItem.id }`
@@ -206,7 +231,7 @@ export const ShoppingCartProvider = ({
         null,
         "Removed ",
         createElement("i", null, cartItem.name),
-        `from ${ cart.name }`,
+        ` from ${ cart.name }`,
       ),
       icon: createElement(MinusOutlined),
       key: `cart-alert-${ cartName }-${ cartItem.id }`
@@ -263,7 +288,7 @@ export const ShoppingCartProvider = ({
     }
   }, [getCart])
   
-  const getCartTotal = useCallback((cartName: string | Cart) => {
+  const getCartTotal = useCallback((cartName: string | Cart): Total => {
     // const sumKeyWithNull = (key: string, a: { [key]: number | null }, b: { [key]: number | null }) => b[key] !== null ? a[key] + b[key] : a[key]
     return buckets
       .map((bucket) => getBucketTotal(cartName, bucket.id))

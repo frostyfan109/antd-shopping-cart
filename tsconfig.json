@@ -1,6 +1,6 @@
 {
   "include": "src",
-  "exclude": ["dist", "node_modules"],
+  "exclude": ["dist", "node_modules", "example"],
   "compilerOptions": {
     "target": "esnext",
     "esModuleInterop": true,
@@ -9,8 +9,8 @@
     "allowSyntheticDefaultImports": true,
     "allowJs": true,
     "forceConsistentCasingInFileNames": true,
-    "noImplicitAny": true,
     "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
     "noImplicitReturns": true,
     "preserveConstEnums": true,
     "sourceMap": true,

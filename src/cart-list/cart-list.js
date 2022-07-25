@@ -10,6 +10,7 @@ const { Text, Paragraph } = Typography
 const { Panel } = Collapse
 
 const CartSection = ({
+    cart,
     name,
     price,
     data,
@@ -37,9 +38,9 @@ const CartSection = ({
         </List>
     ), [expanded, asList, data, renderItem])
 
-    useEffect(() => { 
+    useEffect(() => {
         setExpanded(true)
-    }, [data])
+    }, [cart])
 
 
     if (asList) return list
@@ -127,20 +128,14 @@ export const CartList = ({
     const { buckets, activeCart, getBucketTotal, removeFromCart } = useShoppingCart()
     const hideBucketHeaders = useMemo(() => buckets.length === 1, [buckets])
 
-
-    const bucketData = useMemo(() => (
-        buckets.reduce((acc, bucket) => {
-            acc[bucket.id] = activeCart.items.filter((item) => item.bucketId === bucket.id)
-            return acc
-        }, {})
-    ), [buckets, activeCart])
     const bucketList = useMemo(() => (
         buckets.map((bucket, i) => (
-            <Fragment key={ bucket.id }>
+            <Fragment key={ `cart-bucket-${ activeCart.id }-${ bucket.id }` }>
             <CartSection
+                cart={ activeCart.name }
                 name={ !hideBucketHeaders ? bucket.name : null }
                 price={ getBucketTotal(activeCart, bucket.id) }
-                data={ bucketData[bucket.id] }
+                data={ activeCart.items.filter((item) => item.bucketId === bucket.id) }
                 renderItem={(item) => (
                     <List.Item key={ item.id }>
                         {
@@ -165,7 +160,7 @@ export const CartList = ({
             { i !== buckets.length -1 && <Divider className="cart-section-divider" /> }
             </Fragment>
         ))
-    ), [buckets, bucketData, activeCart, hideBucketHeaders, getBucketTotal, removeFromCart, renderItem ])
+    ), [buckets, activeCart, hideBucketHeaders, getBucketTotal, removeFromCart, renderItem ])
 
     return (
         <div className="shopping-cart-list">
