@@ -37,7 +37,7 @@ const CartSection = ({
         </List>
     ), [expanded, asList, data, renderItem])
 
-    useEffect(() => {
+    useEffect(() => { 
         setExpanded(true)
     }, [data])
 
@@ -50,7 +50,12 @@ const CartSection = ({
                     key={name}
                     collapsible={ disabled ? "disabled" : undefined }
                     header={
-                        <div style={{ display: "flex", justifyContent: "space-between", userSelect: "none", overflow: "hidden" }}>
+                        <div style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            userSelect: "none",
+                            overflow: "hidden"
+                        }}>
                             <Text style={{ fontWeight: 500 }} disabled={ disabled }>
                                 {name} ({data.length})
                             </Text>
@@ -107,7 +112,7 @@ const CartItem = ({
                 </Paragraph>
             )}
         </div>
-        <div style={{ flex: 0, display: "flex", marginLeft: 8 }}>
+        <div style={{ flex: 0, display: "flex", alignItems: "center", marginLeft: 8 }}>
             <RemoveItemButton onClick={ onRemove } />
             { price && (
                 <Text style={{ marginLeft: 12 }}>${ price.toFixed(2) }</Text>
@@ -122,13 +127,20 @@ export const CartList = ({
     const { buckets, activeCart, getBucketTotal, removeFromCart } = useShoppingCart()
     const hideBucketHeaders = useMemo(() => buckets.length === 1, [buckets])
 
+
+    const bucketData = useMemo(() => (
+        buckets.reduce((acc, bucket) => {
+            acc[bucket.id] = activeCart.items.filter((item) => item.bucketId === bucket.id)
+            return acc
+        }, {})
+    ), [buckets, activeCart])
     const bucketList = useMemo(() => (
         buckets.map((bucket, i) => (
             <Fragment key={ bucket.id }>
             <CartSection
                 name={ !hideBucketHeaders ? bucket.name : null }
                 price={ getBucketTotal(activeCart, bucket.id) }
-                data={ activeCart.items.filter((item) => item.bucketId === bucket.id) }
+                data={ bucketData[bucket.id] }
                 renderItem={(item) => (
                     <List.Item key={ item.id }>
                         {
@@ -153,7 +165,7 @@ export const CartList = ({
             { i !== buckets.length -1 && <Divider className="cart-section-divider" /> }
             </Fragment>
         ))
-    ), [buckets, activeCart, hideBucketHeaders, getBucketTotal, removeFromCart, renderItem ])
+    ), [buckets, bucketData, activeCart, hideBucketHeaders, getBucketTotal, removeFromCart, renderItem ])
 
     return (
         <div className="shopping-cart-list">
