@@ -12,22 +12,23 @@ npm install --save antd-shopping-cart
 ## Basic overview
 This package provides the following components:
 
-* Add to cart *
+**Add to cart**
+
 - AddToCartIconButton
 - AddToCartButton
 - AddToCartDropdownButton
 
-* Cart popover *
+**Cart popover**
 - CartPopover
 - CartPopoverButton
 
-* Cart selection *
+**Cart selection**
 - CartSelectDropdown
 
-* Cart creation *
+**Cart creation**
 - CartCreateModal
 
-* Context *
+**Context**
 The components are all based on ShoppingCartContext, which implements IShoppingCartContext.
 
 This package natively provides a local storage-based implementation of the context provider, but you can implement the provider yourself if more control over data flow is necessary. The context is currently strictly synchronous, though asynchronous support will be added in the future. 
