@@ -6,6 +6,7 @@ import { useShoppingCart } from '../'
 
 export const CartPopoverButton = ({
     hideBadge=false,
+    onCheckout,
     badgeProps={},
     buttonProps={},
     cartPopoverProps={}
@@ -17,6 +18,7 @@ export const CartPopoverButton = ({
         <CartPopover
             visible={showShoppingCart}
             onVisibleChange={setShowShoppingCart}
+            onCheckout={ onCheckout }
             { ...cartPopoverProps }
         >
             <Badge

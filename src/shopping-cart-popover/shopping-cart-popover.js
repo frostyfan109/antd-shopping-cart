@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Button, Popover, Space, Typography, Popconfirm, Tooltip } from 'antd'
 import { DownOutlined, ShoppingCartOutlined } from '@ant-design/icons'
 import Texty from 'rc-texty'
@@ -11,12 +11,15 @@ const { Title, Text, Paragraph } = Typography
 export const CartPopover = ({
   visible,
   onVisibleChange,
+  onCheckout,
   cartListProps={},
   popoverContentProps={},
   children
 }) => {
   const { activeCart, setActiveCart, emptyCart, getCartTotal } = useShoppingCart()
   const [name, setName] = useState("")
+
+  const popoverRef = useRef()
 
   const checkoutDisabled = activeCart.items.length === 0
   const cartTotal = useMemo(() => getCartTotal(activeCart), [activeCart, getCartTotal])
@@ -33,6 +36,7 @@ export const CartPopover = ({
   return (
     <Popover
       overlayClassName="shopping-cart-popover"
+      ref={popoverRef}
       title={
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", margin: "8px 0" }}>
           <Title
@@ -111,6 +115,12 @@ export const CartPopover = ({
                   block
                   icon={ <ShoppingCartOutlined /> }
                   disabled={ checkoutDisabled }
+                  onClick={ (e) => {
+                    onCheckout(e)
+                    if (!e.defaultPrevented) {
+                      popoverRef.current?.close()
+                    }
+                  } }
                   style={{
                     pointerEvents: checkoutDisabled ? "none" : undefined
                   }}

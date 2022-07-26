@@ -15,7 +15,7 @@ export const AddToCartDropdownButton =  ({
     buttonProps: _buttonProps={},
     cartSelectDropdownProps={}
 }) => {
-    const { carts, activeCart, addCart, setActiveCart, isItemInBucket, addToCart, removeFromCart, getBucket } = useShoppingCart()
+    const { carts, activeCart, buckets, addCart, setActiveCart, isItemInBucket, addToCart, removeFromCart, getBucket } = useShoppingCart()
     const {
         className:  buttonClassName,
         style: buttonStyle,
@@ -39,11 +39,11 @@ export const AddToCartDropdownButton =  ({
                     <AddToCartIcon />
             ) : (
                 isInBucket(activeCart) ?
-                    `Remove ${ getBucket(bucket).itemName } from cart` :
-                    `Add ${ getBucket(bucket).itemName } to cart`
+                    `Remove${ buckets.length > 1 ? ` ${ getBucket(bucket).itemName }` : "" } from cart` :
+                    `Add ${ buckets.length > 1 ?  ` ${ getBucket(bucket).itemName }` : "" } to cart`
             )
         )
-    ), [activeCart, item, bucket, isInBucket, getBucket, buttonChildren])
+    ), [activeCart, item, bucket, buckets, isInBucket, getBucket, buttonChildren])
 
 
     return (
