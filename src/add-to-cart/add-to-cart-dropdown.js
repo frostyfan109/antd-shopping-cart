@@ -8,7 +8,7 @@ import './add-to-cart.css'
 
 const { Text } = Typography
 
-export const AddToCartDropdown =  ({
+export const AddToCartDropdownButton =  ({
     item,
     notify=true,
     small=false,

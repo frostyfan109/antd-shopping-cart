@@ -12,6 +12,7 @@ export const CartPopover = ({
   visible,
   onVisibleChange,
   cartListProps={},
+  popoverContentProps={},
   children
 }) => {
   const { activeCart, setActiveCart, emptyCart, getCartTotal } = useShoppingCart()
@@ -60,8 +61,10 @@ export const CartPopover = ({
         </div>
       }
       content={
-        <Space direction="vertical">
-          <CartList { ...cartListProps }/>
+        <div className="cart-popover-content" { ...popoverContentProps }>
+          <div className="cart-list-container">
+            <CartList { ...cartListProps }/>
+          </div>
           { cartTotal.subtotal !== null && (
             <div className="cart-total">
               <div className="cart-subtotal">
@@ -72,7 +75,7 @@ export const CartPopover = ({
               </div>
             </div>
           )}
-          <div style={{ display: "flex", alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", marginTop: 8 }}>
             <Popconfirm
               overlayClassName="clear-cart-confirm"
               title={
@@ -117,7 +120,7 @@ export const CartPopover = ({
               </span>
             </Tooltip>
           </div>
-        </Space>
+        </div>
       }
       placement="bottomLeft"
       trigger="click"
