@@ -53,9 +53,9 @@ const App = () => {
           </Menu>
         </Header>
         <Content style={{ background: "#f0f2f5", padding: 32 }}>
-          <Router basepath={ basePath }>
-            <ProductsPage path="/" />
-            <CartPage path={ `cart` } />
+          <Router>
+            <ProductsPage path={ `${ basePath }` } />
+            <CartPage path={ `${ basePath }cart` } />
           </Router>
         </Content>
       </Layout>
