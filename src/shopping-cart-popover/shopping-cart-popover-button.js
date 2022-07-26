@@ -22,13 +22,13 @@ export const CartPopoverButton = ({
             { ...cartPopoverProps }
         >
             <Badge
+                className="shopping-cart-button"
                 count={ hideBadge ? 0 : activeCart.items.length }
                 showZero={ hideBadge ? false : undefined }
-                offset={[ -8, 0 ]}
+                offset={[ 0, 0 ]}
                 { ...badgeProps }
             >
                 <Button
-                    className="shopping-cart-button"
                     type="primary"
                     size="middle"
                     icon={ <ShoppingCartIcon style={{ fontSize: 16 }} /> }

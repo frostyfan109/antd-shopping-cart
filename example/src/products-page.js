@@ -5,7 +5,7 @@ const { Title, Text } = Typography
 
 const products = [
     {
-        name: "Parrot",
+        name: <Text>Parrot</Text>,
         description: "Parrots are intelligent birds. They have relatively large brains, they can learn, and they can use simple tools.",
         image: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Red-browed_Amazon_parrot.jpg/1600px-Red-browed_Amazon_parrot.jpg?20071010185212",
         price: 250
@@ -21,7 +21,7 @@ const products = [
 export const ProductsPage = () => {
     return (
         <List
-            grid={{ gutter: 16, column: 4 }}
+            grid={{ gutter: 16, xs: 1, sm: 2, md: 3, lg: 4, xl: 6 }}
             dataSource={ products }
             renderItem={ (item, i) => (
                 <List.Item key={ i }>
@@ -38,6 +38,7 @@ export const ProductsPage = () => {
                                         description: item.description,
                                         price: item.price,
                                         tax: item.price * .075,
+                                        
                                         from: null,
                                         bucketId: "items",
                                         item: item,
