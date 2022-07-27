@@ -3,7 +3,7 @@ import { message } from 'antd'
 import { PlusOutlined, MinusOutlined } from '@ant-design/icons'
 import { CreateCartModal } from './modals/create-cart-modal'
 import { useLocalStorage } from './hooks/use-local-storage'
-import { CardTabListType } from 'antd/lib/card'
+import getSymbolFromCurrency from 'currency-symbol-map'
 
 type ID = number | string
 
@@ -97,6 +97,8 @@ interface IShoppingCartContext {
 
   buckets: Bucket[], getBucket: (id?: ID) => Bucket,
 
+  currencyCode: string, currencySymbol: string,
+
   openCreateCartModal: () => void, closeCreateCartModal: () => void
 }
 
@@ -107,13 +109,14 @@ interface ShoppingCartProviderProps {
   buckets: Bucket[],
   defaultCartName?: string,
   localStorageKey?: string,
+  currency?: string,
   children: ReactNode
 }
 export const ShoppingCartProvider = ({
   buckets,
   defaultCartName="My cart",
   localStorageKey="shopping_carts",
-
+  currency="USD",
   children
 }: ShoppingCartProviderProps) => {
   const [carts, setCarts] = useLocalStorage<Cart[]>(localStorageKey, [ createCart({
@@ -123,6 +126,9 @@ export const ShoppingCartProvider = ({
   const [showCreateCartModal, setShowCreateCartModal] = useState<boolean>(false)
   const [activeCartName, setActiveCartName] = useState<string>(defaultCartName)
   const activeCart = useMemo<Cart>(() => carts.find((cart) => cart.name === activeCartName), [carts, activeCartName])
+
+  const currencyCode = useMemo(() => currency, [currency])
+  const currencySymbol = useMemo(() => getSymbolFromCurrency(currencyCode), [currencyCode])
 
   const getBucket = useCallback((id?: ID): Bucket => {
     if (!id) {
@@ -316,6 +322,8 @@ export const ShoppingCartProvider = ({
           getBucketTotal, getCartTotal,
 
           buckets, getBucket,
+
+          currencyCode, currencySymbol,
 
           openCreateCartModal, closeCreateCartModal
         }

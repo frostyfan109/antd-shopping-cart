@@ -16,6 +16,8 @@ const CartSection = ({
     data,
     renderItem
 }) => {
+    const { currencySymbol } = useShoppingCart()
+
     const [_expanded, setExpanded] = useState(true)
     
     const asList = useMemo(() => !name, [name])
@@ -63,7 +65,7 @@ const CartSection = ({
                             { !expanded && price.subtotal !== null && (
                                 <Texty type="left" mode="" duration={ 300 } component="span">
                                     {/* If not done like this, children is passed as an array of strings which breaks texty's string split. */}
-                                    { `$${ price.subtotal.toFixed(2) }` }
+                                    { `${ currencySymbol }${ price.subtotal.toFixed(2) }` }
                                 </Texty>
                             )}
                             {/* {!disabled && (
@@ -95,32 +97,35 @@ const CartItem = ({
     productUrl,
     imageUrl,
     onRemove
-}) => (
-    <div className="cart-item">
-        { imageUrl && <img style={{ marginRight: 12 }} width={ 64 } height={ 64 } src={ imageUrl } /> }
-        <div style={{ display: "flex", flexDirection: "column", width: 0, flex: 1 }}>
-            <div style={{ display: "flex", width: "100%", alignItems: "center" }}>
-                <Text style={{  flex: 1, color: "#434343" }} ellipsis>
-                    { name }
-                </Text>
-                <Text type="secondary">
-                    { nameSecondary }
-                </Text>
+}) => {
+    const { currencySymbol } = useShoppingCart()
+    return (
+        <div className="cart-item">
+            { imageUrl && <img style={{ marginRight: 12 }} width={ 64 } height={ 64 } src={ imageUrl } /> }
+            <div style={{ display: "flex", flexDirection: "column", width: 0, flex: 1 }}>
+                <div style={{ display: "flex", width: "100%", alignItems: "center" }}>
+                    <Text style={{  flex: 1, color: "#434343" }} ellipsis>
+                        { name }
+                    </Text>
+                    <Text type="secondary">
+                        { nameSecondary }
+                    </Text>
+                </div>
+                {description && (
+                    <Paragraph className="cart-item-description" type="secondary" ellipsis style={{ marginTop: 4 }}>
+                        { description }
+                    </Paragraph>
+                )}
             </div>
-            {description && (
-                <Paragraph className="cart-item-description" type="secondary" ellipsis style={{ marginTop: 4 }}>
-                    { description }
-                </Paragraph>
-            )}
+            <div style={{ flex: 0, display: "flex", alignItems: "center", marginLeft: 8 }}>
+                <RemoveItemButton onClick={ onRemove } />
+                { price && (
+                    <Text style={{ marginLeft: 12, fontSize: 13 }}>{ currencySymbol }{ price.toFixed(2) }</Text>
+                ) }
+            </div>
         </div>
-        <div style={{ flex: 0, display: "flex", alignItems: "center", marginLeft: 8 }}>
-            <RemoveItemButton onClick={ onRemove } />
-            { price && (
-                <Text style={{ marginLeft: 12, fontSize: 13 }}>${ price.toFixed(2) }</Text>
-            ) }
-        </div>
-    </div>
-)
+    )
+}
 
 export const CartList = ({
     renderItem=undefined

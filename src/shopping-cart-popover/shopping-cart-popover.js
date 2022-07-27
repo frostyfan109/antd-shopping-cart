@@ -16,7 +16,7 @@ export const CartPopover = ({
   popoverContentProps={},
   children
 }) => {
-  const { activeCart, setActiveCart, emptyCart, getCartTotal } = useShoppingCart()
+  const { currencySymbol, activeCart, setActiveCart, emptyCart, getCartTotal } = useShoppingCart()
   const [name, setName] = useState("")
 
   const popoverRef = useRef()
@@ -74,7 +74,7 @@ export const CartPopover = ({
               <div className="cart-subtotal">
                 <span className="subtotal-text">Subtotal</span>
                 <span className="subtotal-value">
-                  ${ cartTotal.subtotal.toFixed(2) }
+                  { currencySymbol }{ cartTotal.subtotal.toFixed(2) }
                 </span>
               </div>
             </div>

@@ -60,6 +60,7 @@
   ],
   "dependencies": {
     "classnames": "^2.3.1",
+    "currency-symbol-map": "^5.1.0",
     "rc-queue-anim": "^2.0.0",
     "rc-texty": "^0.2.0"
   }
