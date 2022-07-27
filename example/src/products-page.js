@@ -5,12 +5,14 @@ const { Title, Text } = Typography
 
 const products = [
     {
-        name: <Text>Parrot</Text>,
+        id: "aaa",
+        name: "Parrot",
         description: "Parrots are intelligent birds. They have relatively large brains, they can learn, and they can use simple tools.",
         image: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Red-browed_Amazon_parrot.jpg/1600px-Red-browed_Amazon_parrot.jpg?20071010185212",
         price: 250
     },
     {
+        id: "bbb",
         name: "Gerbil",
         description: "A gentle and hardy animal, the Mongolian gerbil has become a popular small house pet.",
         image: "https://upload.wikimedia.org/wikipedia/commons/9/9c/Meriones_unguiculatus_%28wild%29.jpg",
@@ -21,10 +23,10 @@ const products = [
 export const ProductsPage = () => {
     return (
         <List
-            grid={{ gutter: 16, xs: 1, sm: 2, md: 3, lg: 4, xl: 6 }}
+            grid={{ gutter: 16, xs: 1, sm: 2, md: 3, lg: 3, xl: 4, xxl: 4 }}
             dataSource={ products }
-            renderItem={ (item, i) => (
-                <List.Item key={ i }>
+            renderItem={ (item) => (
+                <List.Item key={ item.id }>
                     <Card
                         hoverable
                         cover={ <img src={ item.image } /> }

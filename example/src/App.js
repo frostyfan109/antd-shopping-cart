@@ -1,7 +1,7 @@
 import { Layout, Menu, Typography } from 'antd'
 import { ShoppingOutlined } from '@ant-design/icons'
-import { Link, LocationProvider, Router, useLocation } from '@reach/router'
-import { ShoppingCartProvider } from 'antd-shopping-cart'
+import { Link, LocationProvider, navigate, Router, useLocation } from '@reach/router'
+import { CartPopoverButton, ShoppingCartProvider } from 'antd-shopping-cart'
 import { ProductsPage } from './products-page'
 import { CartPage } from './cart-page'
 import 'antd/dist/antd.css'
@@ -22,6 +22,7 @@ const App = () => {
         name: "Items",
         itemName: "item"
       }]}
+      currency="USD"
       localStorageKey="example_carts"
       defaultCartName="My cart"
     >
@@ -51,6 +52,9 @@ const App = () => {
               <Link to={ `${ basePath }cart` }>Cart</Link>
             </Menu.Item>
           </Menu>
+            <div style={{ height: "100%", marginRight: -32 }}>
+              <CartPopoverButton onCheckout={ () => navigate(`${ basePath }cart`) }/>
+            </div>
         </Header>
         <Content style={{ background: "#f0f2f5", padding: 32 }}>
           <Router>
