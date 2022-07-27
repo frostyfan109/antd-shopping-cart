@@ -17,7 +17,6 @@ jobs:
 
       - name: Install and Build 🔧
         run: |
-          echo "CI=false" >> $GITHUB_ENV
           npm install
           npm run deploy
       - name: Deploy 🚀
