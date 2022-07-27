@@ -1,6 +1,9 @@
 .shopping-cart-popover {
     width: 325px;
 }
+.shopping-cart-popover .ant-popover-inner-content {
+    padding-top: 0;
+}
 .shopping-cart-popover .cart-popover-content {
     display: flex;
     flex-direction: column;

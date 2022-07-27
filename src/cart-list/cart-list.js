@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useMemo, useState } from 'react'
-import { List, Typography, Collapse, Space, Divider, InputNumber } from 'antd'
+import { List, Typography, Collapse, Space, Divider, InputNumber, Empty } from 'antd'
 import { DeleteOutlined  } from '@ant-design/icons'
 import QueueAnim from 'rc-queue-anim'
 import Texty from 'rc-texty'
@@ -116,7 +116,7 @@ const CartItem = ({
         <div style={{ flex: 0, display: "flex", alignItems: "center", marginLeft: 8 }}>
             <RemoveItemButton onClick={ onRemove } />
             { price && (
-                <Text style={{ marginLeft: 12 }}>${ price.toFixed(2) }</Text>
+                <Text style={{ marginLeft: 12, fontSize: 13 }}>${ price.toFixed(2) }</Text>
             ) }
         </div>
     </div>
@@ -126,14 +126,14 @@ export const CartList = ({
     renderItem=undefined
 }) => {
     const { buckets, activeCart, getBucketTotal, removeFromCart } = useShoppingCart()
-    const hideBucketHeaders = useMemo(() => buckets.length === 1, [buckets])
+    const singleBucket = useMemo(() => buckets.length === 1, [buckets])
 
     const bucketList = useMemo(() => (
         buckets.map((bucket, i) => (
             <Fragment key={ `cart-bucket-${ activeCart.id }-${ bucket.id }` }>
             <CartSection
                 cart={ activeCart.name }
-                name={ !hideBucketHeaders ? bucket.name : null }
+                name={ !singleBucket ? bucket.name : null }
                 price={ getBucketTotal(activeCart, bucket.id) }
                 data={ activeCart.items.filter((item) => item.bucketId === bucket.id) }
                 renderItem={(item) => (
@@ -160,10 +160,17 @@ export const CartList = ({
             { i !== buckets.length -1 && <Divider className="cart-section-divider" /> }
             </Fragment>
         ))
-    ), [buckets, activeCart, hideBucketHeaders, getBucketTotal, removeFromCart, renderItem ])
+    ), [buckets, activeCart, singleBucket, getBucketTotal, removeFromCart, renderItem ])
 
     return (
-        <div className="shopping-cart-list">
+        <div className="shopping-cart-list" style={{ marginTop: singleBucket ? "12px" : undefined }}>
+            { singleBucket && activeCart.items.length === 0 && (
+                <Empty
+                    image={ Empty.PRESENTED_IMAGE_SIMPLE }
+                    description="No items added"
+                    style={{ margin: "24px 0" }}
+                />
+            ) }
             {
                 bucketList
             }

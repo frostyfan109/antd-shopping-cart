@@ -36,8 +36,8 @@ export const CreateCardModalContent = ({ createShoppingCart, cartName, setCartNa
   }, [])
 
   return (
-    <Space direction="vertical" size="middle">
-      <Space direction="vertical">
+    <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+      <Space direction="vertical" style={{ width: "100%" }}>
         <Text style={{ fontWeight: 500 }}>Name</Text>
         <Form.Item
           validateStatus={ cartNameError && "error" }

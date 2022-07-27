@@ -1,7 +1,6 @@
 .shopping-cart-list {
     display: flex;
     flex-direction: column;
-    margin-top: -16px;
 }
 .shopping-cart-list .cart-section-divider {
     /* margin: 2px 0;
