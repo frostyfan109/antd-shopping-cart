@@ -18,8 +18,8 @@ jobs:
       - name: Install and Build 🔧
         run: |
           npm install
-          npm run build
-        working-directory: example
+          npm install --prefix example
+          npm run build --prefix example
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@3.6.2
         with:
