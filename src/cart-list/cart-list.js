@@ -1,8 +1,9 @@
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
-import { List, Typography, Collapse, Space, Divider, InputNumber, Empty, Tabs, Select } from 'antd'
+import { List, Typography, Collapse, Space, Divider, InputNumber, Empty, Tabs, Select, Checkbox } from 'antd'
 import { DeleteOutlined  } from '@ant-design/icons'
 import QueueAnim from 'rc-queue-anim'
 import Texty from 'rc-texty'
+import classNames from 'classnames'
 import { useShoppingCart } from '../'
 import './cart-list.css'
 
@@ -31,13 +32,15 @@ const CartItem = ({
     onRemove,
     onMove,
     onQuantityChanged,
+    onChecked,
 
     showPrice=true,
     showQuantity=true,
     showMove=true,
     showDelete=true,
     
-    small=true
+    small=true,
+    checked=null,
 }) => {
     const { currencySymbol } = useShoppingCart()
     
@@ -51,10 +54,16 @@ const CartItem = ({
         <a type="button" onClick={ onMove }>Move</a>
     ), [onMove])
 
-    useEffect(() => console.log("mount", name), [])
-
     return (
         <div className="cart-item">
+            { checked !== null && (
+                <Checkbox
+                    checked={ checked }
+                    onChange={ (e) => onChecked(!checked) }
+                    className="cart-item-checkbox"
+                    style={{ marginRight: 12 }}
+                />
+            ) }
             { imageUrl && <img style={{ marginRight: 12 }} width={ 64 } height={ 64 } src={ imageUrl } /> }
             <div style={{ display: "flex", flexDirection: "column", width: 0, flex: 1 }}>
                 <div style={{ display: "flex", width: "100%", alignItems: "center" }}>
@@ -72,7 +81,7 @@ const CartItem = ({
                 )}
                 { !small && showQuantity && (
                     <Space size="middle" style={{ marginTop: 8 }}>
-                        { (price || true ) && showPrice && (
+                        { price && showPrice && (
                             <Text style={{ fontSize: 14 }}>{ currencySymbol }{ (23.53 * quantity).toFixed(2) }</Text>
                         ) }
                         <Select value={ quantity } onChange={ onQuantityChanged }>
@@ -103,42 +112,67 @@ const CartItem = ({
 
 const CartSection = ({
     cart,
-    bucketId: id,
-    bucketName: name,
-    bucketPrice: price,
-    data,
+    bucket,
     renderItem,
-    small=true
-}) => {
-    const { currencySymbol } = useShoppingCart()
+    small=true,
+    
+    checkableItems=false,
+    checkedItems=[],
+    onChecked=(item, checked) => {},
 
+    cartItemProps={}
+}) => {
+    const { currencySymbol, buckets, getBucketTotal, updateCartItem, removeFromCart } = useShoppingCart()
     const [_expanded, setExpanded] = useState(true)
+    
+    const { id } = bucket
+    const singleBucket = useMemo(() => buckets.length === 1, [buckets])
+    const name = useMemo(() => !singleBucket ? bucket.name : null, [singleBucket, bucket])
+    const price = useMemo(() => getBucketTotal(cart.name, id), [cart, id])
+
+    const data = useMemo(() => cart.items.filter((item) => item.bucketId === id), [cart, id])
     
     const asList = useMemo(() => !name, [name])
     const disabled = useMemo(() => data.length === 0, [data])
     const expanded = useMemo(() => _expanded && !disabled, [_expanded, disabled])
 
-    useEffect(() => console.log("mount", name), [])
-
-    const listChildren = small || true ? (
-        <QueueAnim
-            className="ant-list-items"
-            component="ul"
-            duration={ 300 }
-            type={["right", "left"]}
-            leaveReverse
-        >
-            { expanded || asList ? data.map((item) => renderItem(item) ) : null }
-        </QueueAnim>
-    ) : (
-        expanded || asList ? data.map((item) => renderItem(item) ) : null
-    )
-
     const list = (
         <List
+            className={ classNames("cart-section-list", checkedItems.length > 0 && "show-checkboxes") }
             style={{ overflow: "hidden" }}
         >
-            { listChildren }
+            <QueueAnim
+                className="ant-list-items"
+                component="ul"
+                duration={ 300 }
+                type={["right", "left"]}
+                leaveReverse
+            >
+                { expanded || asList ? data.map((item) => (
+                    <List.Item key={ item.id }>
+                        {
+                            renderItem ? (
+                                renderItem(item)
+                            ) : (
+                                <CartItem
+                                    { ...item }
+                                    { ...cartItemProps }
+
+                                    checked={ checkableItems ? checkedItems.includes(item.id) : null }
+                                    small={ small }
+
+                                    onRemove={ () => removeFromCart(cart, item.id) }
+                                    onQuantityChanged={ (quantity) => updateCartItem(cart.name, item.id, {
+                                        quantity
+                                    }) }
+                                    onChecked={ (checked) => onChecked(item, checked) }
+
+                                />
+                            )
+                        }
+                    </List.Item>
+                )) : null }
+            </QueueAnim>
         </List>
     )
 
@@ -185,58 +219,55 @@ const CartSection = ({
 
 export const CartList = ({
     small=true,
+    checkableItems=false,
+    checkableExtra=null,
     cartItemProps={},
     renderItem=undefined,
     ...props
 }) => {
     const { buckets, activeCart, getBucketTotal, removeFromCart, updateCartItem } = useShoppingCart()
+    const [checkedItems, setCheckedItems] = useState([])
+
     const singleBucket = useMemo(() => buckets.length === 1, [buckets])
+
 
     const { style: divStyle, ...divProps } = props
 
-    const Bucket = ({ bucket }) => (
-        <CartSection
-            key={ bucket.id }
-            cart={ activeCart.name }
-            bucketId={ bucket.id }
-            bucketName={ !singleBucket ? bucket.name : null }
-            bucketPrice={ getBucketTotal(activeCart, bucket.id) }
-            data={ activeCart.items.filter((item) => item.bucketId === bucket.id) }
-            renderItem={(item) => (
-                <List.Item key={ item.id }>
-                    {
-                        renderItem ? (
-                            renderItem(item)
-                        ) : (
-                            <CartItem
-                                { ...item }
-                                { ...cartItemProps }
-                                onRemove={ () => removeFromCart(activeCart, item.id) }
-                                onQuantityChanged={ (quantity) => updateCartItem(activeCart.name, item.id, {
-                                    quantity
-                                }) }
-
-                                small={ small }
-                            />
-                        )
-                    }
-                </List.Item>
-            )}
-            small={ small }
-        />
-    )
+    // useEffect(() => {
+    //     setCheckedItems([])
+    // }, [activeCart])
 
     const bucketList = (
-        buckets.map((bucket, i) => small ? (
-            <Fragment key={ `cart-bucket-${ activeCart.id }-${ bucket.id }` }>
-                <Bucket bucket={ bucket } />
-                { i !== buckets.length -1 && <Divider className="cart-section-divider" /> }
-            </Fragment>
-        ) : (
-            <TabPane key={ bucket.id } tab={ bucket.name }>
-                <Bucket bucket={ bucket } />
-            </TabPane>
-        ))
+        buckets.map((bucket, i) => {
+            const bucketComponent = (
+                <CartSection
+                    key={ bucket.id }
+                    cart={ activeCart }
+                    bucket={ bucket }
+                    renderItem={ renderItem }
+                    checkableItems={ checkableItems }
+                    checkedItems={ checkedItems }
+                    onChecked={ (item, checked) => checked ? (
+                        setCheckedItems([ ...checkedItems, item.id ])
+                    ) : (
+                        setCheckedItems(checkedItems.filter((id) => id !== item.id ))
+                    ) }
+                    small={ small }
+
+                    cartItemProps={ cartItemProps }
+                />
+            )
+            return small ? (
+                <Fragment key={ `cart-bucket-${ activeCart.id }-${ bucket.id }` }>
+                    { bucketComponent }
+                    { i !== buckets.length -1 && <Divider className="cart-section-divider" /> }
+                </Fragment>
+            ) : (
+                <TabPane key={ bucket.id } tab={ bucket.name }>
+                    { bucketComponent }
+                </TabPane>
+            )
+        })
     )
 
     const body = small || singleBucket ? (
@@ -259,6 +290,11 @@ export const CartList = ({
             {
                 body
             }
+            { !small && checkableExtra && checkedItems.length > 0 && (
+                <div className="cart-list-checkable-extra">
+                    { checkableExtra }
+                </div>
+            ) }
             {/* <CartSection
                 name="Concepts"
                 data={ concepts }
