@@ -55,3 +55,7 @@
 .shopping-cart-list .cart-item .cart-item-description {
     margin-bottom: 0;
 }
+.shopping-cart-list .cart-item .cart-item-button-container > .ant-space-item > a {
+    text-decoration: underline;
+    color: rgba(0, 0, 0, 0.85);
+}

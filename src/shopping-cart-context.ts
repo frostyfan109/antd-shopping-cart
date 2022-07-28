@@ -85,10 +85,10 @@ interface IShoppingCartContext {
   emptyCart: (name: string | Cart) => void,
   
   addToCart: (cartName: string | Cart, item: ItemBlueprint, notify: boolean) => void,
-  removeFromCart: (cartName: string | Cart, itemId: ID | Item, bucketId: ID, notify: boolean) => void,
+  removeFromCart: (cartName: string | Cart, itemId: ID | Item, notify: boolean) => void,
 
-  isItemInBucket: (cartName: string | Cart, itemId: ID | Item, bucketId: ID) => boolean,
   isItemInCart: (cartName: string | Cart, itemId: ID | Item) => boolean,
+  updateCartItem: (cartName: string | Cart, itemId: ID | Item, props: Partial<Item> | ((prevState: Item) => Partial<Item>)) => void,
   
   activeCart: Cart,
   setActiveCart: (name: string | Cart) => void,
@@ -222,12 +222,11 @@ export const ShoppingCartProvider = ({
       key: `cart-alert-${ cartName }-${ cartItem.id }`
     })
   }, [getCart, updateCart])
-  const removeFromCart = useCallback((cartName: string | Cart, itemId: ID | Item, bucketId: ID, notify=false) => {
+  const removeFromCart = useCallback((cartName: string | Cart, itemId: ID | Item, notify=false) => {
     const cart = getCart(cartName)
     const cartItem = getCartItem(cartName, itemId)
     updateCart(cartName, (cart) => ({
       items: cart.items.filter((_cartItem) => (
-        _cartItem.bucketId !== bucketId ||
         _cartItem.id !== cartItem.id
       ))
     }))
@@ -243,9 +242,20 @@ export const ShoppingCartProvider = ({
       key: `cart-alert-${ cartName }-${ cartItem.id }`
     })
   }, [getCart, getCartItem, updateCart])
+  const updateCartItem = useCallback((cartName: string | Cart, itemId: ID | Item, props: Partial<Item> | ((prevState: Item) => Partial<Item>)) => {
+    const cartItem = getCartItem(cartName, itemId)
 
-  const emptyCart = useCallback((name: string | Cart) => {
-    updateCart(name, (cart) => ({
+    if (typeof props === "function") props = props(cartItem)
+    updateCart(cartName, (cart) => ({
+      items: cart.items.map((item) => item !== cartItem ? item : ({
+        ...cartItem,
+        ...props
+      }))
+    }))
+  }, [getCartItem, updateCart])
+
+  const emptyCart = useCallback((cartName: string | Cart) => {
+    updateCart(cartName, (cart) => ({
       items: []
     }))
   }, [updateCart])
@@ -257,17 +267,10 @@ export const ShoppingCartProvider = ({
     setShowCreateCartModal(false)
   }, [])
 
-  const isItemInBucket = useCallback((cartName: string | Cart, itemId: ID | Item, bucketId: ID): boolean => {
-    const cart = getCart(cartName)
-    const cartItem = getCartItem(cartName, itemId)
-    
-    return cartItem && cartItem.bucketId === bucketId
-
-  }, [getCart, getCartItem])
-
   const isItemInCart = useCallback((cartName: string | Cart, itemId: ID | Item): boolean => {
-    return buckets.some((bucket) => isItemInBucket(cartName, itemId, bucket.id))
-  }, [buckets, isItemInBucket])
+    return !!getCartItem(cartName, itemId)
+
+  }, [getCartItem])
 
   const getBucketTotal = useCallback((cartName: string | Cart, bucketId: ID): Total => {
     const cart = getCart(cartName)
@@ -317,7 +320,7 @@ export const ShoppingCartProvider = ({
       {
         value: {
           carts, addCart, removeCart, updateCart, emptyCart,
-          addToCart, removeFromCart, isItemInBucket, isItemInCart,
+          addToCart, removeFromCart, updateCartItem, isItemInCart,
           activeCart, setActiveCart,
           getBucketTotal, getCartTotal,
 

@@ -10,10 +10,9 @@ export const AddToCartButton = ({
     style={},
     ...props
 }) => {
-    const { activeCart, isItemInBucket, addToCart, removeFromCart } = useShoppingCart()
+    const { activeCart, isItemInCaart, addToCart, removeFromCart } = useShoppingCart()
     
-    const bucket = useMemo(() => item.bucketId, [item.bucketId])
-    const isInBucket = useMemo(() => isItemInBucket(activeCart, item, bucket), [activeCart, item, bucket, isItemInBucket])
+    const isInCart = useMemo(() => isItemInCart(activeCart, item), [activeCart, item, isItemInCart])
 
     return (
         <Button
@@ -22,12 +21,12 @@ export const AddToCartButton = ({
             onClick={ (e) => {
                 e.preventDefault()
                 e.stopPropagation()
-                isInBucket ?
-                    removeFromCart(activeCart, item, bucket, notify) :
-                    addToCart(activeCart, item, bucket, notify)
+                isInCart ?
+                    removeFromCart(activeCart, item, notify) :
+                    addToCart(activeCart, item, notify)
             } }
             style={{
-                color: isInBucket ? "#1890ff" : undefined,
+                color: isInCart ? "#1890ff" : undefined,
                 ...style
             }}
             {...props}

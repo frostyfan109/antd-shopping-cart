@@ -15,7 +15,7 @@ export const AddToCartDropdownButton =  ({
     buttonProps: _buttonProps={},
     cartSelectDropdownProps={}
 }) => {
-    const { carts, activeCart, buckets, addCart, setActiveCart, isItemInBucket, addToCart, removeFromCart, getBucket } = useShoppingCart()
+    const { carts, activeCart, buckets, addCart, setActiveCart, isItemInCart, addToCart, removeFromCart, getBucket } = useShoppingCart()
     const {
         className:  buttonClassName,
         style: buttonStyle,
@@ -24,26 +24,26 @@ export const AddToCartDropdownButton =  ({
     } = _buttonProps
 
     const bucket = useMemo(() => item.bucketId, [item.bucketId])
-    const isInBucket = useCallback((cart) => isItemInBucket(cart, item, bucket), [item, bucket, isItemInBucket])
+    const isInCart = useCallback((cart) => isItemInCart(cart, item), [item, isItemInCart])
     const toggleCart = useCallback((cart) => {
-        isInBucket(cart) ?
-            removeFromCart(cart, item, bucket, notify) :
-            addToCart(cart, item, bucket, notify)
-    }, [isInBucket, item, bucket, notify])
+        isInCart(cart) ?
+            removeFromCart(cart, item, notify) :
+            addToCart(cart, item, notify)
+    }, [isInCart, item, notify])
 
     const buttonContent = useMemo(() => (
         buttonChildren ? buttonChildren : (
             small ? (
-                isInBucket(activeCart) ?
+                isInCart(activeCart) ?
                     <MinusOutlined /> :
                     <AddToCartIcon />
             ) : (
-                isInBucket(activeCart) ?
+                isInCart(activeCart) ?
                     `Remove${ buckets.length > 1 ? ` ${ getBucket(bucket).itemName }` : "" } from cart` :
                     `Add ${ buckets.length > 1 ?  ` ${ getBucket(bucket).itemName }` : "" } to cart`
             )
         )
-    ), [activeCart, item, bucket, buckets, isInBucket, getBucket, buttonChildren])
+    ), [activeCart, item, bucket, buckets, isInCart, getBucket, buttonChildren])
 
 
     return (
@@ -54,12 +54,12 @@ export const AddToCartDropdownButton =  ({
             type={ small ? (
                 "ghost"
             ) : (
-                isInBucket(activeCart) ? "ghost" : "primary"
+                isInCart(activeCart) ? "ghost" : "primary"
             )}
             placement={ "bottomRight" }
             overlay={
                 <CartSelectDropdownMenu
-                    cartIconRender={ (cart) => isInBucket(cart) ? (
+                    cartIconRender={ (cart) => isInCart(cart) ? (
                         <MinusOutlined />
                     ) : (
                         <PlusOutlined />
