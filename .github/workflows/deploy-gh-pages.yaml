@@ -17,8 +17,8 @@ jobs:
 
       - name: Install and Build 🔧
         run: |
-          cd example
-          npm install
+          cd example &&
+          npm install &&
           npm run build
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@3.6.2
