@@ -98,7 +98,7 @@ const CartItem = ({
                     </Space>
                 )}
                 { !small && (
-                    <Space size="middle" className="cart-item-button-container" style={{ marginTop: 12 }}>
+                    <Space size="middle" className="cart-item-button-container" style={{ marginTop: 8 }}>
                         { showMove && moveButton }
                         { showDelete && removeButton }
                     </Space>
@@ -235,12 +235,13 @@ export const CartListExtra = ({
     setSelectedItems
 }) => {
     const { buckets, carts, activeCart, setActiveCart } = useShoppingCart()
+    const [selectDropdownVisible, setSelectDropdownVisible] = useState(false)
 
     const selected = selectedItems.length > 0
     const allSelected = selectedItems.length === activeCart.items.length
     const indeterminateSelection = selected && !allSelected
     const deselectAll = () => setSelectedItems([])
-    const selectAll = () => setSelectedItems(activeCart.items.map((item) => item.id))
+    const selectAll = () => setSelectedItems(activeCart.items)
 
     const checkoutText = useMemo(() => renderCheckoutText(selectedItems.length), [renderCheckoutText])
 
@@ -255,8 +256,8 @@ export const CartListExtra = ({
                             size="large"
                             style={{ padding: "0 4px" }}
                             onClick={ () => {
-                            if (selected) deselectAll()
-                            else selectAll()
+                                if (selected) deselectAll()
+                                else selectAll()
                             } }
                         >
                             <Checkbox
@@ -268,24 +269,56 @@ export const CartListExtra = ({
                         <Dropdown
                             placement="topRight"
                             trigger="click"
+                            visible={ selectDropdownVisible }
+                            onVisibleChange={ setSelectDropdownVisible }
                             overlay={ (
                             <Menu
+                                onClick={ (e) => e.domEvent.nativeEvent.stopImmediatePropagation() }
                                 items={[
-                                {
-                                    label: "All",
-                                    key: 1,
-                                    onClick: selectAll
-                                },
-                                {
-                                    label:  "None",
-                                    key: 2,
-                                    onClick: deselectAll
-                                },
-                                ...buckets.map((bucket) => ({
-                                    label: `${ bucket.name }`,
-                                    key: `all-${ bucket.id }`,
-                                    onClick: () => setSelectedItems(activeCart.items.filter((item) => item.bucketId === bucket.id).map((item) => item.id))
-                                    }))
+                                    // {
+                                    //     label: "All",
+                                    //     key: 1,
+                                    //     onClick: selectAll
+                                    // },
+                                    // {
+                                    //     label:  "None",
+                                    //     key: 2,
+                                    //     onClick: deselectAll
+                                    // },
+                                    ...buckets.map((bucket) => {
+                                        const bucketItems = activeCart.items.filter((item) => item.bucketId === bucket.id)
+                                        const bucketSelectedItems = bucketItems.filter((item) => selectedItems.includes(item) )
+                                        const bucketSelected = bucketSelectedItems.length > 0
+                                        const allBucketSelected = bucketItems.length === bucketSelectedItems.length
+                                        const indeterminateBucketSelection = bucketSelected && !allBucketSelected
+
+                                        const selectedOutsideBucket = selectedItems.filter((item) => !bucketItems.includes(item))
+                                        
+                                        const deselectBucketAll = () => setSelectedItems(
+                                            selectedOutsideBucket
+                                        )
+                                        const selectBucketAll = () => setSelectedItems([
+                                            ...selectedOutsideBucket,
+                                            ...bucketItems
+                                        ])
+
+                                        return {
+                                            label: (
+                                                <Fragment>
+                                                    <Checkbox
+                                                        indeterminate={ indeterminateBucketSelection  }
+                                                        checked={ allBucketSelected }
+                                                    />
+                                                    <Text style={{ marginLeft: 12 }}>{ bucket.name }</Text>
+                                                </Fragment>
+                                            ),
+                                            key: bucket.id,
+                                            onClick: () => {
+                                                if (bucketSelected) deselectBucketAll()
+                                                else selectBucketAll()
+                                            }
+                                        }
+                                    })
                                 ]}
                             />
                             ) }
@@ -393,7 +426,7 @@ export const CartList = ({
                         renderExtra({
                             activeBucket: buckets.find((bucket) => bucket.id === activeBucket),
                             selectedItems: checkedItems.map((id) => activeCart.items.find((item) => item.id === id)),
-                            setSelectedItems: (items) => setCheckedItems(items)
+                            setSelectedItems: (items) => setCheckedItems(items.map((item) => item.id))
                         })
                     }
                 </div>
