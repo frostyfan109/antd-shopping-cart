@@ -84,12 +84,3 @@
     text-decoration: underline;
     color: rgba(0, 0, 0, 0.85);
 }
-
-.cart-list-extra .selected-buttons .selected-item-checkbox .ant-checkbox-indeterminate .ant-checkbox-inner::after {
-    height: 1.5px;
-    background-color: rgba(0, 0, 0, 0.45);
-    transition: background-color 300ms ease;
-}
-.cart-list-extra .selected-buttons .selected-item-checkbox:hover .ant-checkbox-indeterminate .ant-checkbox-inner::after {
-    background-color: #1890ff;
-}

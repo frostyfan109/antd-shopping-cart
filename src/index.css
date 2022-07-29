@@ -8,3 +8,11 @@
 .icon-btn:active {
     color: #096dd9 !important;
 }
+.indeterminate-minus-checkbox .ant-checkbox-indeterminate .ant-checkbox-inner::after {
+    height: 1.5px;
+    background-color: rgba(0, 0, 0, 0.45);
+    transition: background-color 300ms ease;
+}
+.indeterminate-minus-checkbox:hover .ant-checkbox-indeterminate .ant-checkbox-inner::after {
+    background-color: #1890ff;
+}

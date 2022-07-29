@@ -261,7 +261,7 @@ export const CartListExtra = ({
                             } }
                         >
                             <Checkbox
-                                className="selected-item-checkbox"
+                                className="selected-item-checkbox indeterminate-minus-checkbox"
                                 indeterminate={ indeterminateSelection }
                                 checked={ allSelected }
                             />
@@ -306,6 +306,7 @@ export const CartListExtra = ({
                                             label: (
                                                 <Fragment>
                                                     <Checkbox
+                                                        className="indeterminate-minus-checkbox"
                                                         indeterminate={ indeterminateBucketSelection  }
                                                         checked={ allBucketSelected }
                                                     />
