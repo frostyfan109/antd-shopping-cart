@@ -2,7 +2,7 @@ import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'reac
 import {
     List, Typography, Collapse, Space,
     Divider, Empty, Tabs, Select, Checkbox,
-    Button, Dropdown, Menu
+    Button, Dropdown, Menu, Tooltip
 } from 'antd'
 import { DeleteOutlined, FolderAddOutlined, CopyOutlined, CaretDownOutlined } from '@ant-design/icons'
 import QueueAnim from 'rc-queue-anim'
@@ -249,7 +249,7 @@ export const CartListExtra = ({
         <div style={{ display: "flex", alignItems: "center" }}>
             <Space size="small" className="selected-buttons" style={{ flex: 1 }}>
                 { showSelect && (
-                    <Button.Group >
+                    <Button.Group style={{ marginRight: 4 }}>
                         <Button
                             className="selected-item-checkbox-button"
                             type="text"
@@ -329,9 +329,37 @@ export const CartListExtra = ({
                         </Dropdown>
                     </Button.Group>
                 ) }
-                { selected && showDelete && <Button type="text" size="large" icon={ <DeleteOutlined /> } onClick={ () => null } /> }
-                { selected && showMove && <Button type="text" size="large" icon={ <FolderAddOutlined /> } onClick={ () => null } /> }
-                { selected && showCopy && <Button type="text" size="large" icon={ <CopyOutlined /> } onClick={ () => null } /> }
+                { selected && showMove && (
+                    <Tooltip title="Move" align={{ offset: [0, 4] }}>
+                        <Button
+                            type="text"
+                            size="large"
+                            icon={ <FolderAddOutlined /> }
+                            onClick={ () => null }
+                        />
+                    </Tooltip>
+                ) }
+                { selected && showCopy && (
+                    <Tooltip title="Copy" align={{ offset: [0, 4] }}>
+                        <Button
+                            type="text"
+                            size="large"
+                            // This icon is somewhat larger than others in the menu
+                            icon={ <CopyOutlined style={{ fontSize: 16 }} /> }
+                            onClick={ () => null }
+                        />
+                    </Tooltip>
+                ) }
+                { selected && showDelete && (
+                    <Tooltip title="Remove" align={{ offset: [0, 4] }}>
+                        <Button
+                            type="text"
+                            size="large"
+                            icon={ <DeleteOutlined /> }
+                            onClick={ () => null }
+                        />
+                    </Tooltip>
+                ) }
             </Space>
             { checkoutText && (
                 <Button type="primary">
