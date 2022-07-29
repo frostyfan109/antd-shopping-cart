@@ -67,7 +67,7 @@ export const CartPopover = ({
       content={
         <div className="cart-popover-content" { ...popoverContentProps }>
           <div className="cart-list-container">
-            <CartList { ...cartListProps }/>
+            <CartList small={ true } { ...cartListProps }/>
           </div>
           { cartTotal.subtotal !== null && (
             <div className="cart-total">

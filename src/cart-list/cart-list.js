@@ -372,7 +372,7 @@ export const CartListExtra = ({
 }
 
 export const CartList = ({
-    small=true,
+    small=false,
     checkableItems=false,
     renderExtra=(props) => <CartListExtra { ...props } />,
     cartItemProps={},
