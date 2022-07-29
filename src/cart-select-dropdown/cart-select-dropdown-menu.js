@@ -15,7 +15,7 @@ const newCartSearchEntryDefaultProps = {
 export const CartSelectDropdownMenu =  ({
   onSelect,
   newCartSearchEntry=newCartSearchEntryDefaultProps,
-  disableActiveCart=true,
+  highlightActiveCart=true,
   disableSearchEntry=false,
   disableNewCartEntry=false,
   disableFavoriteButton=false,
@@ -40,7 +40,7 @@ export const CartSelectDropdownMenu =  ({
     carts
       .filter((cart) => cart.name.toLowerCase().includes(cartSearch.toLowerCase()))
       .sort((a, b) => a.name.localeCompare(b.name))
-      .sort((a, b) => (b === activeCart) - (a === activeCart))
+      // .sort((a, b) => (b === activeCart) - (a === activeCart))
   ), [carts, activeCart, cartSearch])
   
   const createShoppingCart = useCallback((name) => {
@@ -81,16 +81,22 @@ export const CartSelectDropdownMenu =  ({
                     carts.find((cart)  => cart.name === cartName)
                   )
                 }}
-                disabled={ disableActiveCart && cart === activeCart }
+                style={ highlightActiveCart && cart === activeCart ? {
+                  borderLeft: "3px solid #1890ff",
+                  color: "#1890ff",
+                  background: "#e6f7ff"
+                } : {} }
                 { ...cartEntryProps }
               >
                 { cartIcon }
                 {/* &bull; */}
                 <Text
                   ellipsis
-                  strong={cart === activeCart}
-                  disabled={ disableActiveCart && cart === activeCart }
-                  style={{ flex: 1, marginLeft: cartIcon ? 8 : 0 }}
+                  style={{
+                    flex: 1,
+                    marginLeft: cartIcon ? 8 : 0,
+                    color: highlightActiveCart && cart === activeCart ? "#1890ff" : ""
+                  }}
                 >
                   { cart.name }
                 </Text>

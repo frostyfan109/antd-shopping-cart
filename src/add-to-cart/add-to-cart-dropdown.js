@@ -75,7 +75,7 @@ export const AddToCartDropdownButton =  ({
                     }}
                     disableFavoriteButton
                     disableNewCartEntry
-                    disableActiveCart={ false }
+                    highlightActiveCart={ false }
                     onSelect={ (cart) => {
                         toggleCart(cart)
                     }}
