@@ -1,6 +1,10 @@
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
-import { List, Typography, Collapse, Space, Divider, InputNumber, Empty, Tabs, Select, Checkbox } from 'antd'
-import { DeleteOutlined  } from '@ant-design/icons'
+import {
+    List, Typography, Collapse, Space,
+    Divider, Empty, Tabs, Select, Checkbox,
+    Button, Dropdown, Menu
+} from 'antd'
+import { DeleteOutlined, FolderAddOutlined, CopyOutlined, CaretDownOutlined } from '@ant-design/icons'
 import QueueAnim from 'rc-queue-anim'
 import Texty from 'rc-texty'
 import classNames from 'classnames'
@@ -217,10 +221,98 @@ const CartSection = ({
     )
 }
 
+export const CartListExtra = ({
+    showSelect=true,
+    showDelete=true,
+    showMove=true,
+    showCopy=true,
+    renderCheckoutText=(selectedCount) => (
+        selectedCount > 0 ? `Checkout with ${ selectedCount } selected item${ selectedCount !== 1 ? "s" : "" }` : "Checkout"
+    ),
+    
+    activeBucket,
+    selectedItems,
+    setSelectedItems
+}) => {
+    const { buckets, carts, activeCart, setActiveCart } = useShoppingCart()
+
+    const selected = selectedItems.length > 0
+    const allSelected = selectedItems.length === activeCart.items.length
+    const indeterminateSelection = selected && !allSelected
+    const deselectAll = () => setSelectedItems([])
+    const selectAll = () => setSelectedItems(activeCart.items.map((item) => item.id))
+
+    const checkoutText = useMemo(() => renderCheckoutText(selectedItems.length), [renderCheckoutText])
+
+    return (
+        <div style={{ display: "flex", alignItems: "center" }}>
+            <Space size="small" className="selected-buttons" style={{ flex: 1 }}>
+                { showSelect && (
+                    <Button.Group >
+                        <Button
+                            className="selected-item-checkbox-button"
+                            type="text"
+                            size="large"
+                            style={{ padding: "0 4px" }}
+                            onClick={ () => {
+                            if (selected) deselectAll()
+                            else selectAll()
+                            } }
+                        >
+                            <Checkbox
+                                className="selected-item-checkbox"
+                                indeterminate={ indeterminateSelection }
+                                checked={ allSelected }
+                            />
+                        </Button>
+                        <Dropdown
+                            placement="topRight"
+                            trigger="click"
+                            overlay={ (
+                            <Menu
+                                items={[
+                                {
+                                    label: "All",
+                                    key: 1,
+                                    onClick: selectAll
+                                },
+                                {
+                                    label:  "None",
+                                    key: 2,
+                                    onClick: deselectAll
+                                },
+                                ...buckets.map((bucket) => ({
+                                    label: `${ bucket.name }`,
+                                    key: `all-${ bucket.id }`,
+                                    onClick: () => setSelectedItems(activeCart.items.filter((item) => item.bucketId === bucket.id).map((item) => item.id))
+                                    }))
+                                ]}
+                            />
+                            ) }
+                        >
+                            <Button type="text" size="large" style={{ padding: "0 2px" }}>
+                            <CaretDownOutlined style={{ fontSize: 10, paddingBottom: 2 }} />
+                            </Button>
+                        </Dropdown>
+                    </Button.Group>
+                ) }
+                { selected && showDelete && <Button type="text" size="large" icon={ <DeleteOutlined /> } onClick={ () => null } /> }
+                { selected && showMove && <Button type="text" size="large" icon={ <FolderAddOutlined /> } onClick={ () => null } /> }
+                { selected && showCopy && <Button type="text" size="large" icon={ <CopyOutlined /> } onClick={ () => null } /> }
+            </Space>
+            { checkoutText && (
+                <Button type="primary">
+                    { checkoutText }
+                </Button>
+            ) }
+        </div>
+    )
+}
+
 export const CartList = ({
     small=true,
     checkableItems=false,
-    renderExtra=null,
+    renderExtra=(props) => <CartListExtra { ...props } />,
     cartItemProps={},
     renderItem=undefined,
     ...props
@@ -234,9 +326,9 @@ export const CartList = ({
 
     const { style: divStyle, ...divProps } = props
 
-    // useEffect(() => {
-    //     setCheckedItems([])
-    // }, [activeCart])
+    useEffect(() => {
+        setCheckedItems([])
+    }, [activeCart.name])
 
     const bucketList = (
         buckets.map((bucket, i) => {
