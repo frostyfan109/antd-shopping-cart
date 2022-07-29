@@ -8,7 +8,7 @@
 .shopping-cart-list > .ant-tabs > .ant-tabs-content-holder {
     overflow: auto;
 }
-.shopping-cart-list .cart-list-checkable-extra {
+.shopping-cart-list .cart-list-extra {
     flex: 0;
     padding-top: 16px;
     border-top: 1px solid #f0f0f0;

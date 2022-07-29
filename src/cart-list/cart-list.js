@@ -220,13 +220,14 @@ const CartSection = ({
 export const CartList = ({
     small=true,
     checkableItems=false,
-    checkableExtra=null,
+    renderExtra=null,
     cartItemProps={},
     renderItem=undefined,
     ...props
 }) => {
     const { buckets, activeCart, getBucketTotal, removeFromCart, updateCartItem } = useShoppingCart()
     const [checkedItems, setCheckedItems] = useState([])
+    const [activeBucket, setActiveBucket] = useState()
 
     const singleBucket = useMemo(() => buckets.length === 1, [buckets])
 
@@ -263,7 +264,11 @@ export const CartList = ({
                     { i !== buckets.length -1 && <Divider className="cart-section-divider" /> }
                 </Fragment>
             ) : (
-                <TabPane key={ bucket.id } tab={ bucket.name }>
+                <TabPane key={ bucket.id } tab={
+                    <span>
+                        { bucket.name }
+                    </span>
+                }>
                     { bucketComponent }
                 </TabPane>
             )
@@ -273,7 +278,7 @@ export const CartList = ({
     const body = small || singleBucket ? (
         bucketList
     ) : (
-        <Tabs defaultActiveKey="a">
+        <Tabs activeKey={  activeBucket } onChange={ (bucketId) => setActiveBucket(bucketId) }>
             { bucketList }
         </Tabs>
     )
@@ -290,9 +295,15 @@ export const CartList = ({
             {
                 body
             }
-            { !small && checkableExtra && checkedItems.length > 0 && (
-                <div className="cart-list-checkable-extra">
-                    { checkableExtra }
+            { !small && renderExtra && (
+                <div className="cart-list-extra">
+                    {
+                        renderExtra({
+                            activeBucket: buckets.find((bucket) => bucket.id === activeBucket),
+                            selectedItems: checkedItems.map((id) => activeCart.items.find((item) => item.id === id)),
+                            setSelectedItems: (items) => setCheckedItems(items)
+                        })
+                    }
                 </div>
             ) }
             {/* <CartSection

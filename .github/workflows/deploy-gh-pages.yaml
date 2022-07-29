@@ -18,6 +18,7 @@ jobs:
       - name: Install and Build 🔧
         run: |
           npm install
+          npm run build
           npm install --prefix example
           npm run build --prefix example
       - name: Deploy 🚀
