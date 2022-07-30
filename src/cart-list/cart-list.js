@@ -7,6 +7,7 @@ import {
 import { DeleteOutlined, FolderAddOutlined, CopyOutlined, CaretDownOutlined } from '@ant-design/icons'
 import QueueAnim from 'rc-queue-anim'
 import Texty from 'rc-texty'
+import { SizeMe } from 'react-sizeme'
 import classNames from 'classnames'
 import { useShoppingCart } from '../'
 import './cart-list.css'
@@ -59,7 +60,7 @@ const CartItem = ({
     ), [onMove])
 
     return (
-        <div className="cart-item">
+        <div className={ classNames("cart-item", checked && "cart-item-selected") } style={{ padding: small ? "2px 0" : "8px 0" }}>
             { checked !== null && (
                 <Checkbox
                     checked={ checked }
@@ -68,13 +69,29 @@ const CartItem = ({
                     style={{ marginRight: 12 }}
                 />
             ) }
-            { imageUrl && <img style={{ marginRight: 12 }} width={ 64 } height={ 64 } src={ imageUrl } /> }
+            { imageUrl && (
+                <SizeMe monitorHeight>
+                    { ({ size: { height } }) => (
+                        <div style={{ display: "flex", flexDirection: "column", marginRight: 12 }}>
+                            <img src={ imageUrl } style={{ flexGrow: 1, objectFit: "contain", height }} />
+                        </div>
+                    ) }
+                </SizeMe>
+            ) }
             <div style={{ display: "flex", flexDirection: "column", width: 0, flex: 1 }}>
                 <div style={{ display: "flex", width: "100%", alignItems: "center" }}>
-                    <Text style={{  flex: 1, color: "#434343", fontWeight: small ? 400 : 500, fontSIze: small ? 14 : 15 }} ellipsis>
+                    <Text 
+                        className="cart-item-title"
+                        style={{
+                            flex: 1,
+                            color: "#434343",
+                            fontWeight: small ? 400 : 500,
+                            fontSize: small ? 14 : 15
+                        }} ellipsis
+                    >
                         { name }
                     </Text>
-                    <Text type="secondary">
+                    <Text className="cart-item-secondary-title" type="secondary">
                         { nameSecondary }
                     </Text>
                 </div>
@@ -83,18 +100,22 @@ const CartItem = ({
                         { description }
                     </Paragraph>
                 )}
-                { !small && showQuantity && (
+                { !small && (
                     <Space size="middle" style={{ marginTop: 8 }}>
                         { price && showPrice && (
-                            <Text style={{ fontSize: 14 }}>{ currencySymbol }{ (23.53 * quantity).toFixed(2) }</Text>
+                            <Text className="cart-item-price" style={{ fontSize: 14 }}>
+                                { currencySymbol }{ ( price * quantity).toFixed(2) }
+                            </Text>
                         ) }
-                        <Select value={ quantity } onChange={ onQuantityChanged }>
-                            {
-                                [1, 2, 3, 4].map((i) => (
-                                    <Option key={ i } value={ i }>{ i }</Option>
-                                ))
-                            }
-                        </Select>
+                        { showQuantity && (
+                            <Select value={ quantity } onChange={ onQuantityChanged }>
+                                {
+                                    [1, 2, 3, 4].map((i) => (
+                                        <Option key={ i } value={ i }>{ i }</Option>
+                                    ))
+                                }
+                            </Select>
+                        ) }
                     </Space>
                 )}
                 { !small && (
@@ -107,7 +128,7 @@ const CartItem = ({
             <div style={{ flex: 0, display: "flex", alignItems: "center", marginLeft: 8 }}>
                 { small && showDelete && removeButton }
                 { small && price && showPrice && (
-                    <Text style={{ marginLeft: 12, fontSize: 13 }}>{ currencySymbol }{ price.toFixed(2) }</Text>
+                    <Text className="cart-item-price" style={{ marginLeft: 12, fontSize: 13 }}>{ currencySymbol }{ price.toFixed(2) }</Text>
                 ) }
             </div>
         </div>
@@ -210,7 +231,6 @@ const CartSection = ({
     useEffect(() => {
         setExpanded(true)
     }, [cart])
-
 
     if (asList) return list
     return (

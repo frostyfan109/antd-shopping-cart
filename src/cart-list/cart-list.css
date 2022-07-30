@@ -23,6 +23,7 @@
 .shopping-cart-list .ant-collapse-header {
     padding-left: 0 !important;
     padding-right: 0 !important;
+    padding-bottom: 8px !important;
 }
 .shopping-cart-list .ant-collapse-header .ant-collapse-header-text {
     flex-grow: 1;
@@ -61,6 +62,11 @@
 .shopping-cart-list .cart-item {
     display: flex;
     width: 100%;
+    transition: background-color 300ms ease, padding 300ms ease;
+}
+.shopping-cart-list .cart-item.cart-item-selected {
+    background-color: #e6f7ff;
+    padding: 8px 8px !important;
 }
 .shopping-cart-list .cart-item-checkbox > .ant-checkbox {
     opacity: 0;
