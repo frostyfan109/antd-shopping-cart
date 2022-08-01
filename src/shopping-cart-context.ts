@@ -1,6 +1,7 @@
 import React, { createContext, createElement, Fragment, ReactNode, useCallback, useContext, useMemo, useState } from 'react'
-import { message } from 'antd'
+import { message, notification } from 'antd'
 import { PlusOutlined, MinusOutlined } from '@ant-design/icons'
+import { toWords } from 'number-to-words'
 import { CreateCartModal } from './modals/create-cart-modal'
 import { useLocalStorage } from './hooks/use-local-storage'
 import getSymbolFromCurrency from 'currency-symbol-map'
@@ -89,6 +90,8 @@ interface IShoppingCartContext {
 
   isItemInCart: (cartName: string | Cart, itemId: ID | Item) => boolean,
   updateCartItem: (cartName: string | Cart, itemId: ID | Item, props: Partial<Item> | ((prevState: Item) => Partial<Item>)) => void,
+  moveCartItems: (sourceCartName: string | Cart, targetCartName: string | Cart, itemIds: (ID | Item)[], notify: boolean) => Item[],
+  copyCartItems: (sourceCartName: string | Cart, targetCartName: string | Cart, itemIds: (ID | Item)[], notify: boolean) => Item[],
   
   activeCart: Cart,
   setActiveCart: (name: string | Cart) => void,
@@ -254,6 +257,105 @@ export const ShoppingCartProvider = ({
     }))
   }, [getCartItem, updateCart])
 
+  const moveCartItems = useCallback((
+    sourceCartName: string | Cart,
+    targetCartName: string | Cart,
+    itemIds: (ID | Item)[],
+    notify=false
+  ): Item[] => {
+    const sourceCart = getCart(sourceCartName)
+    const targetCart = getCart(targetCartName)
+    const targetItems = itemIds.map((itemId) => getCartItem(sourceCartName, itemId))
+    const moveableItems = targetItems.filter((item) => !targetCart.items.find((_item) => _item.id === item.id))
+    const unmoveableItems = targetItems.filter((item) => targetCart.items.find((_item) => _item.id === item.id))
+
+    setCarts([
+      ...carts.filter((cart) => cart !== sourceCart && cart !== targetCart),
+      {
+        ...sourceCart,
+        items: sourceCart.items.filter((item) => !moveableItems.find((_item) => _item.id === item.id)),
+        modifiedTime: Date.now()
+      },
+      {
+        ...targetCart,
+        items: [
+          ...targetCart.items,
+          ...moveableItems
+        ],
+        modifiedTime: Date.now()
+      }
+    ])
+
+    if (notify) {
+      if (unmoveableItems.length === 0) {
+        const countAsWords = toWords(moveableItems.length)
+        const isPlural = moveableItems.length !== 1
+        notification.success({
+          message: "Moved items",
+          description:
+            `Moved ${ countAsWords } ${ isPlural ? "items" : "item" } to ${ targetCart.name }.`,
+          key: `cart-alert-move`
+        })
+      }
+      else {
+        const countAsWords = toWords(unmoveableItems.length)
+        const isPlural = unmoveableItems.length !== 1
+        notification.info({
+          message: "Some items could not be moved",
+          description:
+            `${ countAsWords[0].toUpperCase() + countAsWords.slice(1) } ${ isPlural ? "items were" : "item was" } not moved because ${ isPlural ? "they are" : "it is" } already in ${ targetCart.name }.`,
+          key: `cart-alert-move`
+        })
+      }
+    }
+
+    return unmoveableItems
+  }, [carts, getCart, getCartItem])
+
+  const copyCartItems = useCallback((
+    sourceCartName: string | Cart,
+    targetCartName: string | Cart,
+    itemIds: (ID | Item)[],
+    notify=false
+  ): Item[] => {
+    const targetCart = getCart(targetCartName)
+    const targetItems = itemIds.map((itemId) => getCartItem(sourceCartName, itemId))
+    const copyableItems = targetItems.filter((item) => !targetCart.items.find((_item) => _item.id === item.id))
+    const uncopyableItems = targetItems.filter((item) => targetCart.items.find((_item) => _item.id === item.id))
+    
+    updateCart(targetCartName, {
+      items: [
+        ...targetCart.items,
+        ...copyableItems
+      ]
+    })
+
+    if (notify) {
+      if (uncopyableItems.length === 0) {
+        const countAsWords = toWords(copyableItems.length)
+        const isPlural = copyableItems.length !== 1
+        notification.success({
+          message: "Copied items",
+          description:
+            `Copied ${ countAsWords } ${ isPlural ? "items" : "item" } to ${ targetCart.name }.`,
+          key: `cart-alert-copy`
+        })
+      }
+      else {
+        const countAsWords = toWords(uncopyableItems.length)
+        const isPlural = uncopyableItems.length !== 1
+        notification.info({
+          message: "Some items could not be copied",
+          description:
+            `${ countAsWords[0].toUpperCase() + countAsWords.slice(1) } ${ isPlural ? "items were" : "item was" } not copied because ${ isPlural ? "they are" : "it is" } already in ${ targetCart.name }.`,
+          key: `cart-alert-copy`
+        })
+      }
+    }
+
+    return uncopyableItems
+  }, [getCart, getCartItem, updateCart])
+
   const emptyCart = useCallback((cartName: string | Cart) => {
     updateCart(cartName, (cart) => ({
       items: []
@@ -321,6 +423,7 @@ export const ShoppingCartProvider = ({
         value: {
           carts, addCart, removeCart, updateCart, emptyCart,
           addToCart, removeFromCart, updateCartItem, isItemInCart,
+          moveCartItems, copyCartItems,
           activeCart, setActiveCart,
           getBucketTotal, getCartTotal,
 

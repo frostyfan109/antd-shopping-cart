@@ -255,7 +255,7 @@ export const CartListExtra = ({
     selectedItems,
     setSelectedItems
 }) => {
-    const { buckets, carts, activeCart, setActiveCart } = useShoppingCart()
+    const { buckets, carts, activeCart, setActiveCart, moveCartItems, copyCartItems } = useShoppingCart()
     const [selectDropdownVisible, setSelectDropdownVisible] = useState(false)
 
     const selected = selectedItems.length > 0
@@ -358,7 +358,7 @@ export const CartListExtra = ({
                         hideActiveCart={ true }
                         cartIconRender={ () => <FolderAddOutlined /> }
                         onSelect={ (cart) => {
-                            
+                            moveCartItems(activeCart, cart, selectedItems, notify=true)
                         } }
                         dropdownProps={{ placement: "topRight", trigger: "click" }}
                     >
@@ -378,7 +378,8 @@ export const CartListExtra = ({
                         hideActiveCart={ true }
                         cartIconRender={ () => <CopyOutlined /> }
                         onSelect={ (cart) => {
-                            
+                            const uncopyableItems = copyCartItems(activeCart, cart, selectedItems, notify=true)
+                            // setSelectedItems(uncopyableItems)
                         } }
                         dropdownProps={{ placement: "topRight", trigger: "click" }}
                     >

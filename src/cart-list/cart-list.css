@@ -2,14 +2,12 @@
     display: flex;
     flex-direction: column;
 }
-.shopping-cart-list > .ant-tabs {
-    flex-grow: 1;
-}
 .shopping-cart-list > .ant-tabs > .ant-tabs-nav {
     margin-bottom: 0;
 }
 .shopping-cart-list > .section-tab-content {
     overflow: auto;
+    flex-grow: 1;
 }
 .shopping-cart-list .cart-list-extra {
     flex: 0;
