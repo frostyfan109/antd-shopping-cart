@@ -57,7 +57,16 @@ const CartItem = ({
     )), [small, onRemove])
 
     const moveButton = useMemo(() => (
-        <a type="button" onClick={ onMove }>Move</a>
+        <CartSelectDropdown
+            disableFavoriteButton
+            disableNewCartEntry
+            hideActiveCart={ true }
+            cartIconRender={ () => <FolderAddOutlined /> }
+            onSelect={ onMove }
+            dropdownProps={{ placement: "bottomLeft", trigger: "click" }}
+        >
+            <a type="button">Move</a>
+        </CartSelectDropdown>
     ), [onMove])
 
     return (
@@ -148,7 +157,7 @@ const CartSection = ({
 
     cartItemProps={}
 }) => {
-    const { currencySymbol, buckets, getBucketTotal, updateCartItem, removeFromCart } = useShoppingCart()
+    const { currencySymbol, activeCart, buckets, getBucketTotal, updateCartItem, removeFromCart, moveCartItems } = useShoppingCart()
     const [_expanded, setExpanded] = useState(true)
     
     const { id } = bucket
@@ -187,6 +196,7 @@ const CartSection = ({
                                     checked={ checkableItems ? checkedItems.includes(item.id) : null }
                                     small={ small }
 
+                                    onMove={ (cart) => moveCartItems(activeCart, cart, [ item.id ], notify=true) }
                                     onRemove={ () => removeFromCart(cart, item.id) }
                                     onQuantityChanged={ (quantity) => updateCartItem(cart.name, item.id, {
                                         quantity
