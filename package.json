@@ -1,6 +1,6 @@
 {
   "name": "antd-shopping-cart",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Shopping cart UI components for antd",
   "author": "Griffin Roupe",
   "license": "MIT",
@@ -61,6 +61,7 @@
   "dependencies": {
     "classnames": "^2.3.1",
     "currency-symbol-map": "^5.1.0",
+    "number-to-words": "^1.2.4",
     "rc-queue-anim": "^2.0.0",
     "rc-texty": "^0.2.0",
     "react-sizeme": "^3.0.2"
