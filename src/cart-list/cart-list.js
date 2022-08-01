@@ -477,7 +477,8 @@ export const CartList = ({
                             letterSpacing: 0.5,
                             color: "#434343",
                             textTransform: "uppercase",
-                            paddingTop: 16
+                            paddingTop: 16,
+                            marginBottom: 8
                         }}
                     >
                         { bucket.name }
