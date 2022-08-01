@@ -15,6 +15,7 @@ const newCartSearchEntryDefaultProps = {
 export const CartSelectDropdownMenu =  ({
   onSelect,
   newCartSearchEntry=newCartSearchEntryDefaultProps,
+  hideActiveCart=false,
   highlightActiveCart=true,
   disableSearchEntry=false,
   disableNewCartEntry=false,
@@ -39,6 +40,7 @@ export const CartSelectDropdownMenu =  ({
   const cartSource = useMemo(() => (
     carts
       .filter((cart) => cart.name.toLowerCase().includes(cartSearch.toLowerCase()))
+      .filter((cart) => !hideActiveCart || cart !== activeCart)
       .sort((a, b) => a.name.localeCompare(b.name))
       // .sort((a, b) => (b === activeCart) - (a === activeCart))
   ), [carts, activeCart, cartSearch])

@@ -2,18 +2,19 @@ import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'reac
 import {
     List, Typography, Collapse, Space,
     Divider, Empty, Tabs, Select, Checkbox,
-    Button, Dropdown, Menu, Tooltip
+    Button, Dropdown, Menu, Tooltip, Anchor
 } from 'antd'
 import { DeleteOutlined, FolderAddOutlined, CopyOutlined, CaretDownOutlined } from '@ant-design/icons'
 import QueueAnim from 'rc-queue-anim'
 import Texty from 'rc-texty'
 import { SizeMe } from 'react-sizeme'
 import classNames from 'classnames'
-import { useShoppingCart } from '../'
+import { useShoppingCart, CartSelectDropdown, DeleteItemsPopconfirm } from '../'
 import './cart-list.css'
 
-const { Text, Paragraph } = Typography
+const { Title, Text, Paragraph } = Typography
 const { Panel } = Collapse
+const { Link } = Anchor
 const { TabPane } = Tabs
 
 const RemoveItemButton = ({ style={}, onClick, ...props }) => (
@@ -351,35 +352,56 @@ export const CartListExtra = ({
                     </Button.Group>
                 ) }
                 { selected && showMove && (
-                    <Tooltip title="Move" align={{ offset: [0, 4] }}>
-                        <Button
-                            type="text"
-                            size="large"
-                            icon={ <FolderAddOutlined /> }
-                            onClick={ () => null }
-                        />
-                    </Tooltip>
+                    <CartSelectDropdown
+                        disableFavoriteButton
+                        disableNewCartEntry
+                        hideActiveCart={ true }
+                        cartIconRender={ () => <FolderAddOutlined /> }
+                        onSelect={ (cart) => {
+                            
+                        } }
+                        dropdownProps={{ placement: "topRight", trigger: "click" }}
+                    >
+                        <Tooltip title="Move" align={{ offset: [0, 4] }}>
+                            <Button
+                                type="text"
+                                size="large"
+                                icon={ <FolderAddOutlined /> }
+                            />
+                        </Tooltip>
+                    </CartSelectDropdown>
                 ) }
                 { selected && showCopy && (
-                    <Tooltip title="Copy" align={{ offset: [0, 4] }}>
-                        <Button
-                            type="text"
-                            size="large"
-                            // This icon is somewhat larger than others in the menu
-                            icon={ <CopyOutlined style={{ fontSize: 16 }} /> }
-                            onClick={ () => null }
-                        />
-                    </Tooltip>
+                    <CartSelectDropdown
+                        disableFavoriteButton
+                        disableNewCartEntry
+                        hideActiveCart={ true }
+                        cartIconRender={ () => <CopyOutlined /> }
+                        onSelect={ (cart) => {
+                            
+                        } }
+                        dropdownProps={{ placement: "topRight", trigger: "click" }}
+                    >
+                        <Tooltip title="Copy" align={{ offset: [0, 4] }}>
+                            <Button
+                                type="text"
+                                size="large"
+                                // This icon is somewhat larger than others in the menu
+                                icon={ <CopyOutlined style={{ fontSize: 16 }} /> }
+                            />
+                        </Tooltip>
+                    </CartSelectDropdown>
                 ) }
                 { selected && showDelete && (
-                    <Tooltip title="Remove" align={{ offset: [0, 4] }}>
-                        <Button
-                            type="text"
-                            size="large"
-                            icon={ <DeleteOutlined /> }
-                            onClick={ () => null }
-                        />
-                    </Tooltip>
+                    <DeleteItemsPopconfirm items={ selectedItems }>
+                        <Tooltip title="Remove" align={{ offset: [0, 4] }}>
+                            <Button
+                                type="text"
+                                size="large"
+                                icon={ <DeleteOutlined /> }
+                            />
+                        </Tooltip>
+                    </DeleteItemsPopconfirm>
                 ) }
             </Space>
             { checkoutText && (
@@ -407,6 +429,12 @@ export const CartList = ({
 
 
     const { style: divStyle, ...divProps } = props
+
+    useEffect(() => {
+        const itemIds = activeCart.items.map((item) => item.id)
+        const removedCheckedItems = checkedItems.filter((item) => !itemIds.includes(item))
+        if (removedCheckedItems.length > 0) setCheckedItems(checkedItems.filter((item) => !removedCheckedItems.includes(item)))
+    }, [checkedItems, activeCart.items])
 
     useEffect(() => {
         setCheckedItems([])
@@ -437,14 +465,26 @@ export const CartList = ({
                     { bucketComponent }
                     { i !== buckets.length -1 && <Divider className="cart-section-divider" /> }
                 </Fragment>
-            ) : (
-                <TabPane key={ bucket.id } tab={
-                    <span>
+            ) : (   
+                <Fragment key={ `cart-bucket-${ activeCart.id}-${ bucket.id} ` }>
+                    {/* <Divider className="cart-section-divider" style={{ margin: "8px 0" }} plain>{ bucket.name }</Divider> */}
+                    <Title
+                        className="cart-section-header"
+                        id={ `cart-section-header-${ bucket.id }` }
+                        level={ 5 }
+                        style={{
+                            fontSize: 12,
+                            letterSpacing: 0.5,
+                            color: "#434343",
+                            textTransform: "uppercase",
+                            paddingTop: 16
+                        }}
+                    >
                         { bucket.name }
-                    </span>
-                }>
+                    </Title>
                     { bucketComponent }
-                </TabPane>
+                    { i !== buckets.length - 1 && <Divider className="cart-section-divider" style={{ margin: "8px 0" }} /> }
+                </Fragment>
             )
         })
     )
@@ -452,9 +492,38 @@ export const CartList = ({
     const body = small || singleBucket ? (
         bucketList
     ) : (
-        <Tabs activeKey={  activeBucket } onChange={ (bucketId) => setActiveBucket(bucketId) }>
-            { bucketList }
-        </Tabs>
+        <Fragment>
+            <Tabs activeKey={ activeBucket } onChange={ (bucketId) => {
+                document.querySelector(`#cart-section-header-${ bucketId }`).scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                })
+            } }>
+                { buckets.map((bucket) => (
+                    <TabPane key={ bucket.id } tab={
+                        <span>
+                            { bucket.name }
+                        </span>
+                    } />
+                )) }
+            </Tabs>
+            <div className="section-tab-content">
+                { bucketList }
+            </div>
+            <Anchor
+                getContainer={ () => document.querySelector(".section-tab-content") }
+                onChange={ (id) => {
+                    const bucketId = id.replace("#cart-section-header-", "")
+                    setActiveBucket(bucketId)
+                } }
+                // Only used for functionality, not for display component.
+                style={{ display: "none" }}
+            >
+                { buckets.map((bucket) => (
+                    <Link key={ bucket.id } href={ `#cart-section-header-${ bucket.id }` } title={ bucket.name } />
+                ))}
+            </Anchor>
+        </Fragment>
     )
 
     return (

@@ -16,3 +16,6 @@
 .indeterminate-minus-checkbox:hover .ant-checkbox-indeterminate .ant-checkbox-inner::after {
     background-color: #1890ff;
 }
+.no-icon-popconfirm .ant-popover-message-title {
+    padding-left: 0 !important;
+}

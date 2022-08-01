@@ -3,7 +3,7 @@ import { Button, Popover, Space, Typography, Popconfirm, Tooltip } from 'antd'
 import { DownOutlined, ShoppingCartOutlined } from '@ant-design/icons'
 import Texty from 'rc-texty'
 import { CartList, useShoppingCart } from '../'
-import { CartSelectDropdown } from '../'
+import { CartSelectDropdown, EmptyCartPopconfirm } from '../'
 import './shopping-cart-popover.css'
 
 const { Title, Text, Paragraph } = Typography
@@ -81,26 +81,7 @@ export const CartPopover = ({
           )}
           <div style={{ display: "flex", alignItems: "center", marginTop: 8 }}>
             <Tooltip placement="bottom" title={ checkoutDisabled ? "You need to add items to the cart" : undefined}>
-              <Popconfirm
-                overlayClassName="clear-cart-confirm"
-                disabled={ checkoutDisabled }
-                title={
-                  <Space direction="vertical">
-                    <Space>
-                      {/* <Text type="warning"><ExclamationCircleOutlined /></Text> */}
-                      <Text style={{ fontWeight: 500, fontSize: 15 }}>Are you sure you want to empty your cart?</Text>
-                    </Space>
-                    <Paragraph>
-                      You won't be able to undo this action.
-                    </Paragraph>
-                    {/* <Divider style={{ margin: "8px 0" }} /> */}
-                  </Space>
-                }
-                icon={ null }
-                onConfirm={ () => emptyCart(activeCart) }
-                okText="Yes, empty it"
-                cancelText="Cancel"
-              >
+              <EmptyCartPopconfirm disabled={ checkoutDisabled }>
                 <span style={{
                   ...( checkoutDisabled ? { display: "inline-block", cursor: "not-allowed" } : {} )
                 }}>
@@ -110,7 +91,7 @@ export const CartPopover = ({
                     Empty
                   </Button>
                 </span>
-              </Popconfirm>
+              </EmptyCartPopconfirm>
             </Tooltip>
             <Tooltip placement="bottom" title={ checkoutDisabled ? "You need to add items to the cart" : undefined}>
               {/* Button transitions don't currently work properly on Tooltip-wrapped buttons due to a bug in antd.  */}

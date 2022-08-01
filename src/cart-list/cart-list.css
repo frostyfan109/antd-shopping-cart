@@ -5,7 +5,10 @@
 .shopping-cart-list > .ant-tabs {
     flex-grow: 1;
 }
-.shopping-cart-list > .ant-tabs > .ant-tabs-content-holder {
+.shopping-cart-list > .ant-tabs > .ant-tabs-nav {
+    margin-bottom: 0;
+}
+.shopping-cart-list > .section-tab-content {
     overflow: auto;
 }
 .shopping-cart-list .cart-list-extra {

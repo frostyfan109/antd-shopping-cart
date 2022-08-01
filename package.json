@@ -19,7 +19,7 @@
     "test:lint": "eslint .",
     "test:unit": "cross-env CI=1 react-scripts test --env=jsdom",
     "test:watch": "react-scripts test --env=jsdom",
-    "predeploy": "cd example && npm install && npm run build",
+    "predeploy": "npm run build && cd npm install --prefix example && npm run build --prefix example",
     "deploy": "gh-pages -d example/build"
   },
   "peerDependencies": {
@@ -62,6 +62,7 @@
     "classnames": "^2.3.1",
     "currency-symbol-map": "^5.1.0",
     "rc-queue-anim": "^2.0.0",
-    "rc-texty": "^0.2.0"
+    "rc-texty": "^0.2.0",
+    "react-sizeme": "^3.0.2"
   }
 }

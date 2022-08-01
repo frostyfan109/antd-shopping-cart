@@ -1,6 +1,7 @@
 import './index.css'
 export * from './hooks'
 export * from './modals'
+export * from './popconfirm'
 export * from './shopping-cart-context'
 export * from './add-to-cart'
 export * from './shopping-cart-popover'
