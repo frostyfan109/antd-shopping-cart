@@ -2,9 +2,9 @@ import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'reac
 import {
     List, Typography, Collapse, Space,
     Divider, Empty, Tabs, Select, Checkbox,
-    Button, Dropdown, Menu, Tooltip, Anchor
+    Button, Dropdown, Menu, Tooltip, Anchor, Layout
 } from 'antd'
-import { DeleteOutlined, FolderAddOutlined, CopyOutlined, CaretDownOutlined } from '@ant-design/icons'
+import { ShoppingCartOutlined, DeleteOutlined, FolderAddOutlined, CopyOutlined, CaretDownOutlined } from '@ant-design/icons'
 import QueueAnim from 'rc-queue-anim'
 import Texty from 'rc-texty'
 import { SizeMe } from 'react-sizeme'
@@ -13,6 +13,7 @@ import { useShoppingCart, CartSelectDropdown, DeleteItemsPopconfirm } from '../'
 import './cart-list.css'
 
 const { Title, Text, Paragraph } = Typography
+const { Sider, Content } = Layout
 const { Panel } = Collapse
 const { Link } = Anchor
 const { TabPane } = Tabs
@@ -417,7 +418,7 @@ export const CartListExtra = ({
                 ) }
             </Space>
             { checkoutText && (
-                <Button type="primary" disabled={ !selected && activeCart.items.length === 0 } onClick={ () => onCheckout(selectedItems) }>
+                <Button type="primary" disabled={ !selected && activeCart.items.length === 0 } onClick={ () => onCheckout(selectedItems, setSelectedItems) }>
                     { checkoutText }
                 </Button>
             ) }
@@ -433,7 +434,7 @@ export const CartList = ({
     cartItemProps={},
     renderItem=undefined,
 
-    onCheckout=(selectedItems) => {},
+    onCheckout=(selectedItems, setSelectedItems) => {},
     ...props
 }) => {
     const { buckets, activeCart, getBucketTotal, removeFromCart, updateCartItem } = useShoppingCart()
@@ -618,5 +619,67 @@ export const CartList = ({
             /> */}
             {/* <Divider style={{ margin: "2px 0" }} /> */}
         </div>
+    )
+}
+
+export const CartListLayout = ({
+    onCheckout=() => {},
+    cartListProps={}
+}) => {
+    const { buckets, carts, activeCart, setActiveCart, updateCart } = useShoppingCart()
+
+    return (
+        <Layout className="cart-list-layout" style={{ height: 0 }}>
+            <Sider className="cart-list-layout-sider">
+                <Menu
+                    mode="inline"
+                    selectedKeys={[ activeCart.name ]}
+                    style={{ height: "100%" }}
+                    items={ carts.sort((a, b) => a.name.localeCompare(b.name)).map((cart) => ({
+                        key: cart.name,
+                        name: cart.name,
+                        label: cart.name,
+                        icon: <ShoppingCartOutlined />
+                    }) )}
+                    onSelect={ ({ key: name }) => setActiveCart(name) }
+                />
+            </Sider>
+            <Content className="cart-list-layout-content">
+                <div className="cart-list-layout-title-header" style={{ display: "flex" }}>
+                    <Space className="cart-list-layout-title" align="end" style={{ flex: 1 }}>
+                        <Title
+                            level={ 4 }
+                            style={{
+                                marginTop: 0,
+                                marginBottom: 0,
+                                textTransform: "uppercase",
+                                fontSize: 19,
+                                fontWeight: 600,
+                                letterSpacing: 0.5
+                            }}
+                        >
+                            { activeCart.name }
+                        </Title>
+                        <Text type="secondary" style={{ textTransform: "uppercase", letterSpacing: 0.25, fontWeight: 400, fontSize: 16 }}>
+                            { activeCart.items.length } item{ activeCart.items.length !== 1 ? "s" : "" }
+                        </Text>
+                    </Space>
+                    <Space style={{ flex: 0 }}>
+                        <a type="button">Manage</a>
+                    </Space>
+                </div>
+                <Space className="cart-layout-content" direction="vertical" style={{ marginTop: 8 }}>
+                    <CartList
+                        small={ false }
+                        checkableItems={ true }
+                        cartItemProps={{
+                            showQuantity: false
+                        }}
+                        onCheckout={ onCheckout }
+                        { ...cartListProps }
+                    />
+                </Space>
+            </Content>
+        </Layout>
     )
 }
