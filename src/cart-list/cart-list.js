@@ -475,7 +475,7 @@ export const CartList = ({
                     cartItemProps={ cartItemProps }
                 />
             )
-            return small ? (
+            return small || singleBucket ? (
                 <Fragment key={ `cart-bucket-${ activeCart.id }-${ bucket.id }` }>
                     { bucketComponent }
                     { i !== buckets.length -1 && <Divider className="cart-section-divider" /> }
@@ -505,16 +505,23 @@ export const CartList = ({
         })
     )
 
-    const body = small || singleBucket ? (
+    const body = small ? (
         bucketList
-    ) : (
+    ) : singleBucket ? (
+        <div className="section-tab-content">
+            { bucketList }
+        </div>
+    ) : activeCart.items.length > 0 ? (
         <Fragment>
-            <Tabs activeKey={ activeBucket } onChange={ (bucketId) => {
-                document.querySelector(`#cart-section-header-${ bucketId }`).scrollIntoView({
-                    behavior: "smooth",
-                    block: "start"
-                })
-            } }>
+            <Tabs
+                activeKey={ activeBucket }
+                onChange={ (bucketId) => {
+                    document.querySelector(`#cart-section-header-${ bucketId }`).scrollIntoView({
+                        behavior: "smooth",
+                        block: "start"
+                    })
+                } }
+            >
                 { buckets.map((bucket) => (
                     <TabPane key={ bucket.id } tab={
                         <span>
@@ -540,15 +547,15 @@ export const CartList = ({
                 ))}
             </Anchor>
         </Fragment>
-    )
+    ) : null
 
     return (
         <div className="shopping-cart-list" style={{ marginTop: singleBucket ? "12px" : undefined, ...divStyle }} {...divProps}>
-            { singleBucket && activeCart.items.length === 0 && (
+            { activeCart.items.length === 0 && (singleBucket || !small) && (
                 <Empty
                     image={ Empty.PRESENTED_IMAGE_SIMPLE }
                     description="No items added"
-                    style={{ margin: "24px 0" }}
+                    style={{ margin: "24px 0", flexGrow: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}
                 />
             ) }
             {
