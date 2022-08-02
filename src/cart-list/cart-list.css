@@ -91,3 +91,8 @@
     text-decoration: underline;
     color: rgba(0, 0, 0, 0.85);
 }
+
+.cart-list-layout .ant-layout-sider-children {
+    display: flex;
+    flex-direction: column;
+}

@@ -4,7 +4,7 @@ import {
     Divider, Empty, Tabs, Select, Checkbox,
     Button, Dropdown, Menu, Tooltip, Anchor, Layout
 } from 'antd'
-import { ShoppingCartOutlined, DeleteOutlined, FolderAddOutlined, CopyOutlined, CaretDownOutlined } from '@ant-design/icons'
+import { ShoppingCartOutlined, DeleteOutlined, FolderAddOutlined, CopyOutlined, CaretDownOutlined, PlusOutlined } from '@ant-design/icons'
 import QueueAnim from 'rc-queue-anim'
 import Texty from 'rc-texty'
 import { SizeMe } from 'react-sizeme'
@@ -626,7 +626,7 @@ export const CartListLayout = ({
     onCheckout=() => {},
     cartListProps={}
 }) => {
-    const { buckets, carts, activeCart, setActiveCart, updateCart } = useShoppingCart()
+    const { buckets, carts, activeCart, setActiveCart, updateCart, openCreateCartModal, openManageCartModal } = useShoppingCart()
 
     return (
         <Layout className="cart-list-layout" style={{ height: 0 }}>
@@ -634,14 +634,25 @@ export const CartListLayout = ({
                 <Menu
                     mode="inline"
                     selectedKeys={[ activeCart.name ]}
-                    style={{ height: "100%" }}
-                    items={ carts.sort((a, b) => a.name.localeCompare(b.name)).map((cart) => ({
-                        key: cart.name,
-                        name: cart.name,
-                        label: cart.name,
-                        icon: <ShoppingCartOutlined />
-                    }) )}
-                    onSelect={ ({ key: name }) => setActiveCart(name) }
+                    items={[
+                        ...carts.sort((a, b) => a.name.localeCompare(b.name)).map((cart) => ({
+                            key: cart.name,
+                            name: cart.name,
+                            label: cart.name,
+                            icon: <ShoppingCartOutlined />
+                        }) ),
+                        {
+                            key: "create-cart",
+                            name: "Create new cart",
+                            label: "Create new cart",
+                            icon: <PlusOutlined />
+                        }
+                    ]}
+                    onSelect={ ({ key }) => {
+                        if (key === "create-cart") {
+                            openCreateCartModal()
+                        } else setActiveCart(key)
+                    } }
                 />
             </Sider>
             <Content className="cart-list-layout-content">
@@ -665,7 +676,7 @@ export const CartListLayout = ({
                         </Text>
                     </Space>
                     <Space style={{ flex: 0 }}>
-                        <a type="button">Manage</a>
+                        <a type="button" onClick={ () => openManageCartModal(activeCart) }>Manage</a>
                     </Space>
                 </div>
                 <Space className="cart-layout-content" direction="vertical" style={{ marginTop: 8 }}>

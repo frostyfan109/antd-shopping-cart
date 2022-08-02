@@ -4,7 +4,7 @@ import { StarOutlined, StarFilled } from '@ant-design/icons'
 
 const { Text, Paragraph } = Typography
 
-export const CreateCardModalContent = ({ createShoppingCart, cartName, setCartName, cartNameError, favorited, setFavorited }) => {
+export const CreateCartModalContent = ({ createShoppingCart, cartName, setCartName, cartNameError, favorited, setFavorited }) => {
   const inputRef = useRef()
 
   const StarIcon = favorited ? StarFilled : StarOutlined
@@ -113,7 +113,7 @@ export const CreateCartModal = ({ carts, visible, onVisibleChange, onConfirm }) 
         maskStyle={{ zIndex: 1031 }}
         wrapClassName="cart-creation-modal-wrapper"
       >
-        <CreateCardModalContent
+        <CreateCartModalContent
           cartName={cartName}
           setCartName={setCartName}
           cartNameError={cartNameError}

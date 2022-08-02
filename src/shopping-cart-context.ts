@@ -2,7 +2,7 @@ import React, { createContext, createElement, Fragment, ReactNode, useCallback, 
 import { message, notification } from 'antd'
 import { PlusOutlined, MinusOutlined } from '@ant-design/icons'
 import { toWords } from 'number-to-words'
-import { CreateCartModal } from './modals/create-cart-modal'
+import { CreateCartModal, ManageCartModal } from './modals'
 import { useLocalStorage } from './hooks/use-local-storage'
 import getSymbolFromCurrency from 'currency-symbol-map'
 
@@ -59,7 +59,7 @@ interface Bucket {
 const createCart = (cart: CartBlueprint): Cart => {
   return {
     favorited: false,
-    canDelete: false,
+    canDelete: true,
     items: [],
     createdTime: Date.now(),
     modifiedTime: Date.now(),
@@ -102,7 +102,8 @@ interface IShoppingCartContext {
 
   currencyCode: string, currencySymbol: string,
 
-  openCreateCartModal: () => void, closeCreateCartModal: () => void
+  openCreateCartModal: () => void, closeCreateCartModal: () => void,
+  openManageCartModal: (cartName: string | Cart) => void, closeManageCartModal: () => void
 }
 
 export const ShoppingCartContext = createContext<IShoppingCartContext>({} as IShoppingCartContext)
@@ -127,6 +128,7 @@ export const ShoppingCartProvider = ({
     canDelete: false
   }) ])
   const [showCreateCartModal, setShowCreateCartModal] = useState<boolean>(false)
+  const [showManageCartModal, setShowManageCartModal] = useState<string|null>(null)
   const [activeCartName, setActiveCartName] = useState<string>(defaultCartName)
   const activeCart = useMemo<Cart>(() => carts.find((cart) => cart.name === activeCartName), [carts, activeCartName])
 
@@ -173,7 +175,12 @@ export const ShoppingCartProvider = ({
   const removeCart = useCallback((name: string | Cart) => {
     const cart = getCart(name)
     setCarts(carts.filter((_cart) => _cart.name !== cart.name))
-    if (cart.name === activeCart.name) setActiveCart(defaultCartName)
+    if (cart.name === activeCart.name) {
+      const sortedCarts = carts.sort((a, b) => a.name.localeCompare(b.name))
+      const index = sortedCarts.indexOf(cart)
+      const nextUpCart = index === 0 ? sortedCarts[1] : sortedCarts[index - 1]
+      setActiveCart(nextUpCart.name)
+    }
   }, [carts, activeCart, getCart, setActiveCart])
 
   const updateCart = useCallback((
@@ -368,6 +375,13 @@ export const ShoppingCartProvider = ({
   const closeCreateCartModal = useCallback(() => {
     setShowCreateCartModal(false)
   }, [])
+  const openManageCartModal = useCallback((cartName: string | Cart) => {
+    const cart = getCart(cartName)
+    setShowManageCartModal(cart.name)
+  }, [getCart])
+  const closeManageCartModal = useCallback(() => {
+    setShowManageCartModal(null)
+  }, [])
 
   const isItemInCart = useCallback((cartName: string | Cart, itemId: ID | Item): boolean => {
     return !!getCartItem(cartName, itemId)
@@ -431,7 +445,8 @@ export const ShoppingCartProvider = ({
 
           currencyCode, currencySymbol,
 
-          openCreateCartModal, closeCreateCartModal
+          openCreateCartModal, closeCreateCartModal,
+          openManageCartModal, closeManageCartModal
         }
       },
       createElement(
@@ -453,6 +468,27 @@ export const ShoppingCartProvider = ({
             },
             visible: showCreateCartModal,
             onVisibleChange: setShowCreateCartModal
+          }
+        ),
+        createElement(
+          ManageCartModal,
+          {
+            cart: carts.find((cart) => cart.name === showManageCartModal),
+            carts,
+            onConfirm: (cartName: string, favorited: boolean) => {
+              updateCart(showManageCartModal, {
+                name: cartName,
+                favorited
+              })
+              setActiveCartName(cartName)
+              setShowManageCartModal(null)
+            },
+            onDelete: () => {
+              removeCart(showManageCartModal)
+              setShowManageCartModal(null)
+            },
+            visible: showManageCartModal !== null,
+            onVisibleChange: () => setShowManageCartModal(null)
           }
         )
       )
