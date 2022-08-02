@@ -260,10 +260,11 @@ export const CartListExtra = ({
     renderCheckoutText=(selectedCount) => (
         selectedCount > 0 ? `Checkout with ${ selectedCount } selected item${ selectedCount !== 1 ? "s" : "" }` : "Checkout"
     ),
-    
     activeBucket,
     selectedItems,
-    setSelectedItems
+    setSelectedItems,
+
+    onCheckout=() => {}
 }) => {
     const { buckets, carts, activeCart, setActiveCart, moveCartItems, copyCartItems } = useShoppingCart()
     const [selectDropdownVisible, setSelectDropdownVisible] = useState(false)
@@ -274,7 +275,7 @@ export const CartListExtra = ({
     const deselectAll = () => setSelectedItems([])
     const selectAll = () => setSelectedItems(activeCart.items)
 
-    const checkoutText = useMemo(() => renderCheckoutText(selectedItems.length), [renderCheckoutText])
+    const checkoutText = useMemo(() => renderCheckoutText(selectedItems.length), [selectedItems.length, renderCheckoutText])
 
     return (
         <div style={{ display: "flex", alignItems: "center" }}>
@@ -416,7 +417,7 @@ export const CartListExtra = ({
                 ) }
             </Space>
             { checkoutText && (
-                <Button type="primary">
+                <Button type="primary" disabled={ !selected && activeCart.items.length === 0 } onClick={ () => onCheckout(selectedItems) }>
                     { checkoutText }
                 </Button>
             ) }
@@ -427,9 +428,12 @@ export const CartListExtra = ({
 export const CartList = ({
     small=false,
     checkableItems=false,
-    renderExtra=(props) => <CartListExtra { ...props } />,
+    showExtra=true,
+    extraProps={},
     cartItemProps={},
     renderItem=undefined,
+
+    onCheckout=(selectedItems) => {},
     ...props
 }) => {
     const { buckets, activeCart, getBucketTotal, removeFromCart, updateCartItem } = useShoppingCart()
@@ -550,15 +554,17 @@ export const CartList = ({
             {
                 body
             }
-            { !small && renderExtra && (
+            { !small && showExtra && (
                 <div className="cart-list-extra">
-                    {
-                        renderExtra({
-                            activeBucket: buckets.find((bucket) => bucket.id === activeBucket),
-                            selectedItems: checkedItems.map((id) => activeCart.items.find((item) => item.id === id)),
-                            setSelectedItems: (items) => setCheckedItems(items.map((item) => item.id))
-                        })
-                    }
+                    <CartListExtra
+                        activeBucket={ buckets.find((bucket) => bucket.id === activeBucket) }
+                        selectedItems={ checkedItems.map((id) => activeCart.items.find((item) => item.id === id)) }
+                        setSelectedItems={ (items) => setCheckedItems(items.map((item) => item.id)) }
+
+                        onCheckout={ onCheckout }
+
+                        { ...extraProps }
+                    />
                 </div>
             ) }
             {/* <CartSection

@@ -33,6 +33,7 @@
     "@rollup/plugin-image": "^2.1.1",
     "@rollup/plugin-node-resolve": "^13.3.0",
     "@svgr/rollup": "^6.3.1",
+    "@types/number-to-words": "^1.2.1",
     "@types/react": "^18.0.15",
     "antd": "^4.21.7",
     "babel-core": "^6.26.3",
