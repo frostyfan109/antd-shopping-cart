@@ -82,6 +82,7 @@ export const CartPopover = ({
           <div style={{ display: "flex", alignItems: "center", marginTop: 8 }}>
             <Tooltip placement="bottom" title={ checkoutDisabled ? "You need to add items to the cart" : undefined}>
               <EmptyCartPopconfirm disabled={ checkoutDisabled }>
+                {/* Button transitions don't currently work properly on Tooltip-wrapped buttons due to a bug in antd.  */}
                 <span style={{
                   ...( checkoutDisabled ? { display: "inline-block", cursor: "not-allowed" } : {} )
                 }}>
@@ -93,32 +94,22 @@ export const CartPopover = ({
                 </span>
               </EmptyCartPopconfirm>
             </Tooltip>
-            <Tooltip placement="bottom" title={ checkoutDisabled ? "You need to add items to the cart" : undefined}>
-              {/* Button transitions don't currently work properly on Tooltip-wrapped buttons due to a bug in antd.  */}
-              <span style={{
-                flexGrow: 1,
-                marginLeft: 8,
-                ...( checkoutDisabled ? { display: "inline-block", cursor: "not-allowed", width: "100%" } : {} )
-              }}>
-                <Button
-                  type="primary"
-                  block
-                  icon={ <ShoppingCartOutlined /> }
-                  disabled={ checkoutDisabled }
-                  onClick={ (e) => {
-                    onCheckout(e)
-                    if (!e.defaultPrevented) {
-                      popoverRef.current?.close()
-                    }
-                  } }
-                  style={{
-                    pointerEvents: checkoutDisabled ? "none" : undefined
-                  }}
-                >
-                  Checkout
-                </Button>
-              </span>
-            </Tooltip>
+            <Button
+              type="primary"
+              block
+              icon={ <ShoppingCartOutlined /> }
+              onClick={ (e) => {
+                onCheckout(e)
+                if (!e.defaultPrevented) {
+                  popoverRef.current?.close()
+                }
+              } }
+              style={{
+                flexGrow: 1, marginLeft: 8
+              }}
+            >
+              Checkout
+            </Button>
           </div>
         </div>
       }
