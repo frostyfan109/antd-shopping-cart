@@ -1,5 +1,6 @@
 .shopping-cart-popover {
     width: 325px;
+    position: fixed !important;
 }
 .shopping-cart-popover .ant-popover-inner-content {
     padding-top: 0;
