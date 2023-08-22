@@ -4,7 +4,7 @@ import {
     Divider, Empty, Tabs, Select, Checkbox,
     Button, Dropdown, Menu, Tooltip, Anchor, Layout
 } from 'antd'
-import { ShoppingCartOutlined, DeleteOutlined, FolderAddOutlined, CopyOutlined, CaretDownOutlined, PlusOutlined } from '@ant-design/icons'
+import { ShoppingCartOutlined, DeleteOutlined, FolderAddOutlined, CopyOutlined, CaretDownOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons'
 import QueueAnim from 'rc-queue-anim'
 import Texty from 'rc-texty'
 import { SizeMe } from 'react-sizeme'
@@ -626,7 +626,7 @@ export const CartListLayout = ({
     onCheckout=() => {},
     cartListProps={}
 }) => {
-    const { buckets, carts, activeCart, setActiveCart, updateCart, openCreateCartModal, openManageCartModal } = useShoppingCart()
+    const { buckets, carts, activeCart, setActiveCart, updateCart, openCreateCartModal, openImportCartModal, openManageCartModal } = useShoppingCart()
 
     return (
         <Layout className="cart-list-layout" style={{ height: 0 }}>
@@ -646,11 +646,19 @@ export const CartListLayout = ({
                             name: "Create new cart",
                             label: "Create new cart",
                             icon: <PlusOutlined />
+                        },
+                        {
+                            key: "import-cart",
+                            name: "Import cart",
+                            label: "Import cart",
+                            icon: <UploadOutlined />
                         }
                     ]}
                     onSelect={ ({ key }) => {
                         if (key === "create-cart") {
                             openCreateCartModal()
+                        } else if (key === "import-cart") {
+                            openImportCartModal()
                         } else setActiveCart(key)
                     } }
                 />

@@ -2,7 +2,7 @@ import React, { createContext, createElement, Fragment, ReactNode, useCallback, 
 import { message, notification } from 'antd'
 import { PlusOutlined, MinusOutlined } from '@ant-design/icons'
 import { toWords } from 'number-to-words'
-import { CreateCartModal, ManageCartModal } from './modals'
+import { CreateCartModal, ManageCartModal, ImportCartModal } from './modals'
 import { useLocalStorage } from './hooks/use-local-storage'
 import getSymbolFromCurrency from 'currency-symbol-map'
 
@@ -103,6 +103,7 @@ interface IShoppingCartContext {
   currencyCode: string, currencySymbol: string,
 
   openCreateCartModal: () => void, closeCreateCartModal: () => void,
+  openImportCartModal: () => void, closeImportCartModal: () => void,
   openManageCartModal: (cartName: string | Cart) => void, closeManageCartModal: () => void
 }
 
@@ -128,6 +129,7 @@ export const ShoppingCartProvider = ({
     canDelete: false
   }) ])
   const [showCreateCartModal, setShowCreateCartModal] = useState<boolean>(false)
+  const [showImportCartModal, setShowImportCartModal] = useState<boolean>(false)
   const [showManageCartModal, setShowManageCartModal] = useState<string|null>(null)
   const [activeCartName, setActiveCartName] = useState<string>(defaultCartName)
   const activeCart = useMemo<Cart>(() => carts.find((cart) => cart.name === activeCartName), [carts, activeCartName])
@@ -375,6 +377,12 @@ export const ShoppingCartProvider = ({
   const closeCreateCartModal = useCallback(() => {
     setShowCreateCartModal(false)
   }, [])
+  const openImportCartModal = useCallback(() => {
+    setShowImportCartModal(true)
+  }, [])
+  const closeImportCartModal = useCallback(() => {
+    setShowImportCartModal(false)
+  }, [])
   const openManageCartModal = useCallback((cartName: string | Cart) => {
     const cart = getCart(cartName)
     setShowManageCartModal(cart.name)
@@ -446,6 +454,7 @@ export const ShoppingCartProvider = ({
           currencyCode, currencySymbol,
 
           openCreateCartModal, closeCreateCartModal,
+          openImportCartModal, closeImportCartModal,
           openManageCartModal, closeManageCartModal
         }
       },
@@ -468,6 +477,23 @@ export const ShoppingCartProvider = ({
             },
             visible: showCreateCartModal,
             onVisibleChange: setShowCreateCartModal
+          }
+        ),
+        createElement(
+          ImportCartModal,
+          {
+            carts,
+            onConfirm: (cartName: string, favorited: boolean) => {
+              addCart({
+                name: cartName,
+                favorited,
+              })
+              setActiveCartName(cartName)
+              setShowImportCartModal(false)
+              
+            },
+            visible: showImportCartModal,
+            onVisibleChange: setShowImportCartModal
           }
         ),
         createElement(
