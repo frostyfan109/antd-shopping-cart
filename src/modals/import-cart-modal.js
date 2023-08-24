@@ -2,8 +2,21 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Modal, Space, Form, Input, Typography } from 'antd'
 import { StarOutlined, StarFilled, UploadOutlined } from '@ant-design/icons'
 import Dragger from 'antd/lib/upload/Dragger'
+import { z } from 'zod'
+import { parse as yamlParse } from 'yaml'
 
 const { Text, Paragraph } = Typography
+
+/**
+ * Zod validator to check that the cart uploaded by the user conforms to the
+ * internal data structure
+ */
+const cartSchema = z.object({
+  concept_id: z.string().array(),
+  study_id: z.string().array(),
+  variable_id: z.string().array(),
+  cde_id: z.string().array()
+})
 
 export const ImportCartModalContent = ({
   createShoppingCart,
@@ -44,6 +57,10 @@ export const ImportCartModalContent = ({
   }, [])
 
   const [fileList, setFileList] = useState([])
+  const [error, setError] = useState({
+    message: '',
+    raw: null
+  })
 
   const [fileContents, setFileContents] = useState({})
   useEffect(() => {
@@ -52,7 +69,100 @@ export const ImportCartModalContent = ({
       const [file] = fileList
       if (file.status !== 'done' || !file.originFileObj) return
 
-      setFileContents(JSON.parse(await file.originFileObj.text()))
+      const fileText = await file.originFileObj.text()
+
+      // all of the input file types need to become json anyway, so
+      // store in this variable
+      let translatedJson
+
+      // this switch takes care of converting the various file formats into json
+      switch (file.type) {
+        case 'application/json': {
+          try {
+            translatedJson = JSON.parse(fileText)
+          } catch (e) {
+            setError({
+              message: 'The file contains invalid JSON.',
+              raw: e
+            })
+            return
+          }
+          setCartName(file.name.replace('.json', ''))
+          break
+        }
+
+        case 'application/x-yaml': {
+          try {
+            translatedJson = yamlParse(fileText)
+          } catch (e) {
+            setError({
+              message: 'The file contains invalid YAML.',
+              raw: e
+            })
+            return
+          }
+          setCartName(file.name.replace('.yaml', ''))
+          break
+        }
+
+        case 'text/csv': {
+          try {
+            const lines = fileText.split('\n')
+            if (lines.length === 0) {
+              throw new Error('CSV file is empty')
+            }
+
+            // create a new object with the columns titles as keys and
+            // empty arrays (rows) to fill out
+            const columns = lines.shift().split(',')
+            translatedJson = columns.reduce(
+              (acc, col) => ({
+                ...acc,
+                [col]: []
+              }),
+              {}
+            )
+
+            // fill out the rows
+            for (const row of lines) {
+              const rowCells = row.split(',')
+              for (const [colIndex, cell] of Object.entries(rowCells)) {
+                if (cell !== '') translatedJson[columns[colIndex]].push(cell)
+              }
+            }
+          } catch (e) {
+            setError({
+              message: 'There was an error parsing the CSV file.',
+              raw: e
+            })
+          }
+          break
+        }
+
+        default: {
+          setError({
+            message: 'Uploaded an unsupported file type.',
+            raw: null
+          })
+          return
+        }
+      }
+
+      const validatedJson = cartSchema.safeParse(translatedJson)
+      if (validatedJson.success) {
+        const { data } = validatedJson
+        setCartName(data.name)
+        setFileContents(data)
+        setError({
+          message: '',
+          raw: null
+        })
+      } else {
+        setError({
+          message: 'The JSON file selected is not compatible with DUG.',
+          raw: validatedJson.error
+        })
+      }
     })()
   }, [fileList])
 
@@ -63,7 +173,7 @@ export const ImportCartModalContent = ({
       </Paragraph>
       <Dragger
         name='imported-cart-file'
-        accept='application/json'
+        accept='application/json, application/x-yaml, text/csv'
         fileList={fileList}
         onChange={({ file }) => {
           setFileList([file])
@@ -75,9 +185,17 @@ export const ImportCartModalContent = ({
           Click or drag file to this area to upload
         </p>
         <p className='ant-upload-hint'>
-          Supported file types: <code>.json</code>
+          Supported file types: <code>.json</code>, <code>.yaml</code>,{' '}
+          <code>.csv</code>
         </p>
       </Dragger>
+      {error.message && (
+        <div>
+          <p>{error.message}</p>
+          <pre>{JSON.stringify(error.raw, null, 2)}</pre>
+          <pre>{error.raw.toString()}</pre>
+        </div>
+      )}
       <Space direction='vertical' style={{ width: '100%' }}>
         <Text style={{ fontWeight: 500 }}>Name</Text>
         <Form.Item
