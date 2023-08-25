@@ -245,9 +245,6 @@ export const ImportCartModalContent = ({
           </div>
         </Form.Item>
       </Space>
-      <pre style={{ maxHeight: 500, overflowY: 'auto' }}>
-        {JSON.stringify(fileContents, null, 2)}
-      </pre>
     </Space>
   )
 }
