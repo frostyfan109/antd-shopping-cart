@@ -135,7 +135,9 @@ export const ImportCartModalContent = ({
               message: 'There was an error parsing the CSV file.',
               raw: e
             })
+            return
           }
+          setCartName(file.name.replace('.csv', ''))
           break
         }
 
@@ -151,7 +153,6 @@ export const ImportCartModalContent = ({
       const validatedJson = cartSchema.safeParse(translatedJson)
       if (validatedJson.success) {
         const { data } = validatedJson
-        setCartName(data.name)
         setFileContents(data)
         setError({
           message: '',
@@ -159,7 +160,7 @@ export const ImportCartModalContent = ({
         })
       } else {
         setError({
-          message: 'The JSON file selected is not compatible with DUG.',
+          message: 'The file selected is not compatible with DUG.',
           raw: validatedJson.error
         })
       }
