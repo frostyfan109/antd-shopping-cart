@@ -26,7 +26,10 @@ export const ImportCartModalContent = ({
   setCartName,
   cartNameError,
   favorited,
-  setFavorited
+  setFavorited,
+  setFileContents,
+  error,
+  setError
 }) => {
   const inputRef = useRef()
 
@@ -59,12 +62,7 @@ export const ImportCartModalContent = ({
   }, [])
 
   const [fileList, setFileList] = useState([])
-  const [error, setError] = useState({
-    message: '',
-    raw: null
-  })
 
-  const [fileContents, setFileContents] = useState({})
   useEffect(() => {
     setFileContents({})
     ;(async () => {
@@ -171,9 +169,7 @@ export const ImportCartModalContent = ({
 
   return (
     <Space direction='vertical' size='middle' style={{ width: '100%' }}>
-      <Paragraph>
-        Import a Dug JSON file saved locally on your computer.
-      </Paragraph>
+      <Paragraph>Import a Dug file saved locally on your computer.</Paragraph>
       <Dragger
         name='imported-cart-file'
         accept='application/json, application/x-yaml, text/csv'
@@ -259,6 +255,11 @@ export const ImportCartModal = ({
   const [cartName, setCartName] = useState('')
   const [cartNameError, setCartNameError] = useState(false)
   const [favorited, setFavorited] = useState(false)
+  const [fileContents, setFileContents] = useState({})
+  const [error, setError] = useState({
+    message: '',
+    raw: null
+  })
 
   useEffect(() => {
     setCartName('')
@@ -283,9 +284,12 @@ export const ImportCartModal = ({
     if (carts.find((cart) => cart.name === cartName)) {
       setCartNameError(true)
     } else {
-      onConfirm(cartName, favorited)
+      onConfirm(cartName, favorited, fileContents)
     }
-  }, [carts, cartName, onConfirm])
+  }, [carts, cartName, onConfirm, fileContents, favorited])
+
+  const isOkButtonDisabled =
+    error.message !== '' || Object.entries(fileContents).length === 0
 
   return (
     <Modal
@@ -297,6 +301,9 @@ export const ImportCartModal = ({
       visible={visible}
       onVisibleChange={onVisibleChange}
       onOk={createShoppingCart}
+      okButtonProps={{
+        disabled: isOkButtonDisabled
+      }}
       onCancel={() => onVisibleChange(false)}
       zIndex={1032}
       maskStyle={{ zIndex: 1031 }}
@@ -309,6 +316,9 @@ export const ImportCartModal = ({
         favorited={favorited}
         setFavorited={setFavorited}
         createShoppingCart={createShoppingCart}
+        setFileContents={setFileContents}
+        error={error}
+        setError={setError}
       />
     </Modal>
   )

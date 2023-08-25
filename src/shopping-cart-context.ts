@@ -14,6 +14,13 @@ type Total = {
   total: number | null
 }
 
+interface CartImport {
+  concept_id?: string[];
+  study_id?: string[];
+  variable_id?: string[];
+  cde_id?: string[];
+}
+
 interface From {
   type: string,
   value: any
@@ -483,14 +490,8 @@ export const ShoppingCartProvider = ({
           ImportCartModal,
           {
             carts,
-            onConfirm: (cartName: string, favorited: boolean) => {
-              addCart({
-                name: cartName,
-                favorited,
-              })
-              setActiveCartName(cartName)
-              setShowImportCartModal(false)
-              
+            onConfirm: (cartName: string, favorited: boolean, itemIds: CartImport) => {
+              console.log("Imported a new cart named", cartName, "with the following items", itemIds)
             },
             visible: showImportCartModal,
             onVisibleChange: setShowImportCartModal
