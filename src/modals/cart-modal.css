@@ -1,0 +1,19 @@
+.import-modal-error-collapse .ant-collapse-header{
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+  padding-bottom: 0px !important;
+}
+
+.import-modal-error-collapse .ant-collapse-content-box {
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+  padding-bottom: 0px !important;
+}
+
+.import-modal-error-collapse .ant-collapse-content-box pre {
+  margin: 0px;
+}
+
+.import-modal-error-alert .ant-alert-close-icon {
+  display: none;
+}

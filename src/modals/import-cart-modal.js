@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { Modal, Space, Form, Input, Typography } from 'antd'
+import { Modal, Space, Form, Input, Typography, Alert, Collapse } from 'antd'
 import { StarOutlined, StarFilled, UploadOutlined } from '@ant-design/icons'
 import Dragger from 'antd/lib/upload/Dragger'
 import { z } from 'zod'
 import { parse as yamlParse } from 'yaml'
+
+import './cart-modal.css'
 
 const { Text, Paragraph } = Typography
 
@@ -191,11 +193,19 @@ export const ImportCartModalContent = ({
         </p>
       </Dragger>
       {error.message && (
-        <div>
-          <p>{error.message}</p>
-          <pre>{JSON.stringify(error.raw, null, 2)}</pre>
-          <pre>{error.raw.toString()}</pre>
-        </div>
+        <Alert
+          className='import-modal-error-alert'
+          message={error.message}
+          description={
+            <Collapse ghost className='import-modal-error-collapse'>
+              <Collapse.Panel header='See error details'>
+                <pre>{error.raw.toString()}</pre>
+              </Collapse.Panel>
+            </Collapse>
+          }
+          type='error'
+          closable
+        />
       )}
       <Space direction='vertical' style={{ width: '100%' }}>
         <Text style={{ fontWeight: 500 }}>Name</Text>
