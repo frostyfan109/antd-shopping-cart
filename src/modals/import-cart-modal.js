@@ -182,6 +182,10 @@ export const ImportCartModalContent = ({
         fileList={fileList}
         onRemove={() => {
           setFileList([])
+          setError({
+            message: '',
+            raw: null
+          })
         }}
         beforeUpload={(file) => {
           setFileList([file])
