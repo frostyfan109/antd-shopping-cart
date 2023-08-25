@@ -66,12 +66,12 @@ export const ImportCartModalContent = ({
 
   const [fileContents, setFileContents] = useState({})
   useEffect(() => {
+    setFileContents({})
     ;(async () => {
       if (fileList.length === 0) return
       const [file] = fileList
-      if (file.status !== 'done' || !file.originFileObj) return
 
-      const fileText = await file.originFileObj.text()
+      const fileText = await file.text()
 
       // all of the input file types need to become json anyway, so
       // store in this variable
@@ -177,10 +177,15 @@ export const ImportCartModalContent = ({
       <Dragger
         name='imported-cart-file'
         accept='application/json, application/x-yaml, text/csv'
+        // to do a single file only, we need to make this component
+        // controlled: https://stackoverflow.com/questions/44332630/single-ant-upload-list-item-only
         fileList={fileList}
-        onChange={({ file }) => {
+        onRemove={() => {
+          setFileList([])
+        }}
+        beforeUpload={(file) => {
           setFileList([file])
-          setCartName(file.name.replace('.json', ''))
+          return false
         }}
       >
         <UploadOutlined />
