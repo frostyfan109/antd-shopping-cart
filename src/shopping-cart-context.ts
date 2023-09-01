@@ -49,7 +49,7 @@ interface Cart {
   name: string,
   canDelete: boolean,
   favorited: boolean,
-  items: Item[]
+  items: Item[],
   modifiedTime: number,
   createdTime: number,
 }
