@@ -5,6 +5,7 @@ import { toWords } from 'number-to-words'
 import { CreateCartModal, ManageCartModal, ImportCartModal } from './modals'
 import { useLocalStorage } from './hooks/use-local-storage'
 import getSymbolFromCurrency from 'currency-symbol-map'
+import type { ConceptsResponse, ConceptsResponseSuccess, StudiesResponse, StudiesResponseSuccess, VariablesResponse, VariablesResponseSuccess } from './dug-search-types'
 
 type ID = number | string
 
@@ -122,6 +123,7 @@ interface ShoppingCartProviderProps {
   defaultCartName?: string,
   localStorageKey?: string,
   currency?: string,
+  helxSearchUrl: string,
   children: ReactNode
 }
 export const ShoppingCartProvider = ({
@@ -129,6 +131,7 @@ export const ShoppingCartProvider = ({
   defaultCartName="My cart",
   localStorageKey="shopping_carts",
   currency="USD",
+  helxSearchUrl,
   children
 }: ShoppingCartProviderProps) => {
   const [carts, setCarts] = useLocalStorage<Cart[]>(localStorageKey, [ createCart({
@@ -208,6 +211,150 @@ export const ShoppingCartProvider = ({
       }
     ])
   }, [carts, getCart])
+
+  const importCart = useCallback(async (
+    name: string,
+    itemIds: CartImport,
+    favorited: boolean = false,
+  ) => {
+    if (getCart(name)) throw new Error("Cannot create a new cart with duplicate `name` key.")
+    
+    const fetchConcepts = (): Promise<ConceptsResponseSuccess | null>  =>
+      fetch(`${helxSearchUrl}/concepts?ids=${itemIds.concept_id.join('&ids=')}`)
+        .then(res => res.json() as Promise<ConceptsResponse>)
+        .then(json => ("detail" in json ? null : json))
+
+    const fetchStudies = (): Promise<StudiesResponseSuccess | null> =>
+      fetch(`${helxSearchUrl}/studies?ids=${itemIds.study_id.join('&ids=')}`)
+        .then(res => res.json() as Promise<StudiesResponse>)
+        .then(json => ("detail" in json ? null : json))
+
+    const fetchVariables = (): Promise<VariablesResponseSuccess | null> =>
+      fetch(`${helxSearchUrl}/variables?ids=${itemIds.variable_id.join('&ids=')}`)
+        .then(res => res.json() as Promise<VariablesResponse>)
+        .then(json => ("detail" in json ? null : json))
+
+    const fetchCdes = (): Promise<VariablesResponseSuccess | null> =>
+      fetch(`${helxSearchUrl}/variables?ids=${itemIds.cde_id.join('&ids=')}`)
+        .then(res => res.json() as Promise<VariablesResponse>)
+        .then(json => ("detail" in json ? null : json))
+
+    const [concepts, studies, variables, cdes]: [
+      ConceptsResponseSuccess | null,
+      StudiesResponseSuccess | null,
+      VariablesResponseSuccess | null,
+      VariablesResponseSuccess | null,
+    ] = await Promise.allSettled([
+      Array.isArray(itemIds.concept_id) && itemIds.concept_id.length > 0
+        ? fetchConcepts()
+        : null,
+      Array.isArray(itemIds.study_id) && itemIds.study_id.length > 0 
+        ? fetchStudies()
+        : null,
+      Array.isArray(itemIds.variable_id) && itemIds.variable_id.length > 0 
+        ? fetchVariables()
+        : null,
+      Array.isArray(itemIds.cde_id) && itemIds.cde_id.length > 0 
+        ? fetchCdes()
+        : null,
+    ]).then(([conceptRes, studyRes, varRes, cdeRes]) => [
+      conceptRes.status === 'fulfilled' ? conceptRes.value : null,
+      studyRes.status === 'fulfilled' ? studyRes.value : null,
+      varRes.status === 'fulfilled' ? varRes.value : null,
+      cdeRes.status === 'fulfilled' ? cdeRes.value : null,
+    ]);
+
+    const items: Item[] = [];
+
+    if (concepts !== null) {
+      concepts.result.docs.map(({ _source }) => _source).forEach(concept => {
+        items.push({
+          createdTime: Date.now(),
+          name: `${concept.name} (${concept.type})`,
+          id: concept.id,
+          description: concept.description,
+          price: null,
+          tax: null,
+          quantity: null,
+          from: {
+            type: "cart-import",
+            value: "cart-import"
+          },
+          bucketId: "concepts",
+          item: concept,
+        })
+      })
+    }
+
+    if (studies !== null) {
+      studies.result.forEach(study => {
+        items.push({
+          createdTime: Date.now(),
+          name: study.c_name,
+          id: study.c_id,
+          description: study.c_link,
+          price: null,
+          tax: null,
+          quantity: null,
+          from: {
+            type: "cart-import",
+            value: "cart-import"
+          },
+          bucketId: "studies",
+          item: study,
+        })
+      })
+    }
+
+    if (variables !== null) {
+      variables.result.docs.map(({ _source }) => _source).forEach(variable => {
+        items.push({
+          createdTime: Date.now(),
+          name: variable.element_name,
+          id: variable.element_id,
+          description: variable.element_desc,
+          price: null,
+          tax: null,
+          quantity: null,
+          from: {
+            type: "cart-import",
+            value: "cart-import"
+          },
+          bucketId: "variables",
+          item: variable,
+        })
+      })
+    }
+
+    if (cdes !== null) {
+      cdes.result.docs.map(({ _source }) => _source).forEach(cde => {
+        items.push({
+          createdTime: Date.now(),
+          name: cde.element_name,
+          id: cde.element_id,
+          description: cde.element_desc,
+          price: null,
+          tax: null,
+          quantity: null,
+          from: {
+            type: "cart-import",
+            value: "cart-import"
+          },
+          bucketId: "cdes",
+          item: cde,
+        })
+      })
+    }
+
+    setCarts(prevCarts => [
+      ...prevCarts,
+      createCart({
+        name,
+        favorited,
+        items,
+      })
+    ])
+  }, [getCart, setCarts, createCart])
 
   /** The `from` field will be appended to shopping cart elements to track where they originate from in the DUG UI.
    * 
@@ -491,7 +638,7 @@ export const ShoppingCartProvider = ({
           {
             carts,
             onConfirm: (cartName: string, favorited: boolean, itemIds: CartImport) => {
-              console.log("Imported a new cart named", cartName, "with the following items", itemIds)
+              importCart(cartName, itemIds, favorited)
             },
             visible: showImportCartModal,
             onVisibleChange: setShowImportCartModal
