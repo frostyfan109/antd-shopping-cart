@@ -215,6 +215,7 @@ export const ShoppingCartProvider = ({
   const importCart = useCallback(async (
     name: string,
     itemIds: CartImport,
+    onImport?: (invalidIds: string[]) => void,
     favorited: boolean = false,
   ) => {
     if (getCart(name)) throw new Error("Cannot create a new cart with duplicate `name` key.")
@@ -354,6 +355,14 @@ export const ShoppingCartProvider = ({
         items,
       })
     ])
+
+    if (typeof onImport === 'function') {
+      const userIds = [ ...itemIds.concept_id, ...itemIds.study_id, ...itemIds.variable_id, ...itemIds.cde_id];
+      const fetchedIds = items.map(({ id }) => id);
+
+      const userIdsThatWereNotFetched = userIds.filter((id) => !fetchedIds.includes(id))
+      onImport(userIdsThatWereNotFetched);
+    }
   }, [getCart, setCarts, createCart])
 
   /** The `from` field will be appended to shopping cart elements to track where they originate from in the DUG UI.
@@ -637,8 +646,9 @@ export const ShoppingCartProvider = ({
           ImportCartModal,
           {
             carts,
-            onConfirm: (cartName: string, favorited: boolean, itemIds: CartImport) => {
-              importCart(cartName, itemIds, favorited)
+            onConfirm: (cartName: string, itemIds: CartImport, onImport: (invalidIds: string[]) => void, favorited: boolean) => {
+              importCart(cartName, itemIds, onImport, favorited)
+              setShowImportCartModal(false)
             },
             visible: showImportCartModal,
             onVisibleChange: setShowImportCartModal

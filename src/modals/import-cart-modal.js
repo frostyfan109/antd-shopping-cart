@@ -1,5 +1,14 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { Modal, Space, Form, Input, Typography, Alert, Collapse } from 'antd'
+import {
+  Modal,
+  Space,
+  Form,
+  Input,
+  Typography,
+  Alert,
+  Collapse,
+  message
+} from 'antd'
 import { StarOutlined, StarFilled, UploadOutlined } from '@ant-design/icons'
 import Dragger from 'antd/lib/upload/Dragger'
 import { z } from 'zod'
@@ -280,11 +289,32 @@ export const ImportCartModal = ({
 
   useEffect(() => setCartNameError(false), [cartName])
 
+  const onImport = useCallback((invalidIds) => {
+    if (invalidIds.length > 0) {
+      message.open({
+        type: 'error',
+        duration: 10,
+        content: (
+          <>
+            {invalidIds.length === 1
+              ? 'An id was unable to be imported:'
+              : 'Several ids were unable to be imported:'}
+            <ul style={{ textAlign: 'left' }}>
+              {invalidIds.map((id) => (
+                <li key={id}>{id}</li>
+              ))}
+            </ul>
+          </>
+        )
+      })
+    }
+  }, [])
+
   const createShoppingCart = useCallback(() => {
     if (carts.find((cart) => cart.name === cartName)) {
       setCartNameError(true)
     } else {
-      onConfirm(cartName, favorited, fileContents)
+      onConfirm(cartName, fileContents, onImport, favorited)
     }
   }, [carts, cartName, onConfirm, fileContents, favorited])
 
