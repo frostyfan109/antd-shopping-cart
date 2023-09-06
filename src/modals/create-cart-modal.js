@@ -64,7 +64,8 @@ export const CreateCartModalContent = ({ createShoppingCart, cartName, setCartNa
         </Form.Item>
       </Space>
       <Paragraph>
-        Add items to a cart to...
+        The Shopping Cart is a feature to allow users to export a file of Dug
+        search results to take outside of Dug for further analyses.
       </Paragraph>
     </Space>
   )
