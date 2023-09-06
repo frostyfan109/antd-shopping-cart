@@ -299,7 +299,13 @@ export const ImportCartModal = ({
             {invalidIds.length === 1
               ? 'An id was unable to be imported:'
               : 'Several ids were unable to be imported:'}
-            <ul style={{ textAlign: 'left' }}>
+            <ul
+              style={{
+                listStyleType: 'none',
+                paddingLeft: 'none',
+                marginTop: '1rem'
+              }}
+            >
               {invalidIds.map((id) => (
                 <li key={id}>{id}</li>
               ))}
